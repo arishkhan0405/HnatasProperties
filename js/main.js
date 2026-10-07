@@ -44,6 +44,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 14. Property Comparison Engine & Matrix
   initPropertyComparisonEngine();
+
+  // 15. Interactive WhatsApp VIP Chatbot Engine
+  initWhatsAppChatbot();
 });
 
 /* ==========================================================================
@@ -739,4 +742,285 @@ function renderCompareTable() {
     .join('')}</tr>`;
 
   table.innerHTML = headerRow + priceRow + locRow + bedsRow + bathsRow + areaRow + actionRow;
+}
+
+/* ==========================================================================
+   15. INTERACTIVE WHATSAPP VIP CHATBOT ENGINE
+   ========================================================================== */
+function initWhatsAppChatbot() {
+  const triggerBtn = document.getElementById('whatsapp-bot-toggle');
+  const chatBox = document.getElementById('whatsapp-chat-box');
+  const closeBtn = document.getElementById('whatsapp-chat-close');
+  const badge = document.getElementById('whatsapp-badge');
+  const chatBody = document.getElementById('whatsapp-chat-body');
+  const chatForm = document.getElementById('whatsapp-chat-form');
+  const chatInput = document.getElementById('whatsapp-chat-input');
+  const chipBtns = document.querySelectorAll('.wa-chip-btn');
+
+  if (!triggerBtn || !chatBox) return;
+
+  // 1. Single Configurable Business WhatsApp Variable
+  const BUSINESS_WHATSAPP = "+9177044 50500";
+
+  // Conversational Lead State
+  let currentStep = 0; // 0: Name, 1: Phone, 2: Requirement, 3: Location, 4: Budget, 5: Question/Ready
+  const leadState = {
+    name: '',
+    phone: '',
+    requirement: '',
+    location: '',
+    budget: '',
+    question: ''
+  };
+
+  // Toggle Chat Box Window
+  triggerBtn.addEventListener('click', () => {
+    const isActive = chatBox.classList.contains('active');
+    if (!isActive) {
+      chatBox.classList.add('active');
+      if (badge) badge.style.opacity = '0';
+      if (chatInput) chatInput.focus();
+    } else {
+      chatBox.classList.remove('active');
+    }
+  });
+
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => {
+      chatBox.classList.remove('active');
+    });
+  }
+
+  // Handle Quick Action Chips
+  chipBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const intent = btn.getAttribute('data-intent');
+      if (intent) {
+        leadState.requirement = intent;
+        if (!leadState.question) leadState.question = intent;
+        appendUserMsg(intent);
+
+        if (!leadState.name) {
+          currentStep = 0;
+          setTimeout(() => {
+            appendBotMsg(`Great choice! 📍 <strong>${escapeHtml(intent)}</strong> is a premier layout option.<br><br>May I know your <strong>Full Name</strong>?`);
+          }, 300);
+        } else if (!leadState.phone) {
+          currentStep = 1;
+          setTimeout(() => {
+            appendBotMsg(`Thanks <strong>${escapeHtml(leadState.name)}</strong>! Please enter your <strong>10-digit Mobile Number</strong>:`);
+          }, 300);
+        } else {
+          showEnquirySummaryCard();
+        }
+      }
+    });
+  });
+
+  // Handle Input Form Submission
+  if (chatForm) {
+    chatForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const val = chatInput.value.trim();
+      if (!val) return;
+
+      appendUserMsg(val);
+      chatInput.value = '';
+
+      processUserInput(val);
+    });
+  }
+
+  function processUserInput(inputVal) {
+    if (currentStep === 0) {
+      // Step 0: Collect Name
+      leadState.name = inputVal;
+      currentStep = 1;
+      setTimeout(() => {
+        appendBotMsg(`Pleased to meet you, <strong>${escapeHtml(leadState.name)}</strong>! 🙏<br><br>Please enter your <strong>10-digit Phone Number</strong>:`);
+      }, 300);
+
+    } else if (currentStep === 1) {
+      // Step 1: Validate & Collect Phone
+      if (validatePhone(inputVal)) {
+        leadState.phone = inputVal;
+        currentStep = 2;
+        setTimeout(() => {
+          appendBotMsg(`Got it! 📱 <strong>${escapeHtml(leadState.phone)}</strong><br><br>What type of property layout are you interested in?`, [
+            { text: "📍 Commercial NH Frontage", val: "Commercial NH Frontage Plots" },
+            { text: "💎 Diamond East/North Facing", val: "Diamond East/North Facing Plots" },
+            { text: "Platinum Dual Corner", val: "Platinum Dual Corner Plots" },
+            { text: "Villa Land Compound", val: "Combined Villa Land Compound" }
+          ]);
+        }, 300);
+      } else {
+        // Invalid phone number - prompt gently without blocking
+        setTimeout(() => {
+          appendBotMsg(`⚠️ Please enter a valid 10-digit phone number (e.g. 98424 00000) so we can send the layout PDF via WhatsApp.`);
+        }, 300);
+      }
+
+    } else if (currentStep === 2) {
+      // Step 2: Collect Requirement
+      leadState.requirement = inputVal;
+      currentStep = 3;
+      setTimeout(() => {
+        appendBotMsg(`Selected: 🏠 <strong>${escapeHtml(leadState.requirement)}</strong><br><br>What is your preferred location / city?`, [
+          { text: "Trichy / Manikandam", val: "Trichy / Manikandam" },
+          { text: "Chennai", val: "Chennai" },
+          { text: "NRI Location (Dubai/Singapore)", val: "NRI Location" }
+        ]);
+      }, 300);
+
+    } else if (currentStep === 3) {
+      // Step 3: Collect Location
+      leadState.location = inputVal;
+      currentStep = 4;
+      setTimeout(() => {
+        appendBotMsg(`Got it: 📍 <strong>${escapeHtml(leadState.location)}</strong><br><br>What is your estimated budget range?`, [
+          { text: "₹15 Lakhs - ₹25 Lakhs", val: "₹15L - ₹25L" },
+          { text: "₹25 Lakhs - ₹50 Lakhs", val: "₹25L - ₹50L" },
+          { text: "₹50 Lakhs+", val: "₹50L+" }
+        ]);
+      }, 300);
+
+    } else if (currentStep === 4) {
+      // Step 4: Collect Budget
+      leadState.budget = inputVal;
+      currentStep = 5;
+      setTimeout(() => {
+        appendBotMsg(`Noted: 💰 Budget <strong>${escapeHtml(leadState.budget)}</strong><br><br>Do you have any specific question, plot direction preference, or site visit date?`);
+      }, 300);
+
+    } else {
+      // Step 5+: Collect Question / Final details
+      if (!leadState.question || leadState.question === 'Not provided') {
+        leadState.question = inputVal;
+      }
+      showEnquirySummaryCard();
+    }
+  }
+
+  // 12. Phone Number Validation (checks digits length >= 10)
+  function validatePhone(phoneStr) {
+    if (!phoneStr) return false;
+    const cleanDigits = phoneStr.replace(/\D/g, '');
+    return cleanDigits.length >= 10 && cleanDigits.length <= 15;
+  }
+
+  // 3 & 5 & 13. Generate Pre-filled Encoded WhatsApp URL
+  function generateWhatsAppURL(data) {
+    const name = (data.name && data.name.trim()) ? data.name.trim() : 'Not provided';
+    const phone = (data.phone && data.phone.trim()) ? data.phone.trim() : 'Not provided';
+    const requirement = (data.requirement && data.requirement.trim()) ? data.requirement.trim() : 'Not provided';
+    const location = (data.location && data.location.trim()) ? data.location.trim() : 'Not provided';
+    const budget = (data.budget && data.budget.trim()) ? data.budget.trim() : 'Not provided';
+    const question = (data.question && data.question.trim()) ? data.question.trim() : 'Not provided';
+
+    const message = `🔔 NEW WEBSITE ENQUIRY
+
+👤 Name: ${name}
+📱 Phone: ${phone}
+🏠 Requirement: ${requirement}
+📍 Location: ${location}
+💰 Budget: ${budget}
+
+💬 Customer Question:
+${question}
+
+🌐 Source: Real Estate Website`;
+
+    const cleanNumber = BUSINESS_WHATSAPP.replace(/[^\d]/g, '');
+    return `https://wa.me/${cleanNumber}?text=${encodeURIComponent(message)}`;
+  }
+
+  // Render Enquiry Summary Card with "Send Enquiry on WhatsApp" Button
+  function showEnquirySummaryCard() {
+    const whatsappURL = generateWhatsAppURL(leadState);
+
+    const summaryHtml = `
+      <div class="whatsapp-msg whatsapp-msg-bot">
+        <div class="whatsapp-msg-bubble">
+          <strong>Enquiry Ready to Send! 🚀</strong><br>
+          Review your details below:
+          
+          <div class="wa-summary-card">
+            <div class="wa-summary-line"><span class="wa-summary-label">👤 Name:</span> <span class="wa-summary-val">${escapeHtml(leadState.name || 'Not provided')}</span></div>
+            <div class="wa-summary-line"><span class="wa-summary-label">📱 Phone:</span> <span class="wa-summary-val">${escapeHtml(leadState.phone || 'Not provided')}</span></div>
+            <div class="wa-summary-line"><span class="wa-summary-label">🏠 Requirement:</span> <span class="wa-summary-val">${escapeHtml(leadState.requirement || 'Not provided')}</span></div>
+            <div class="wa-summary-line"><span class="wa-summary-label">📍 Location:</span> <span class="wa-summary-val">${escapeHtml(leadState.location || 'Not provided')}</span></div>
+            <div class="wa-summary-line"><span class="wa-summary-label">💰 Budget:</span> <span class="wa-summary-val">${escapeHtml(leadState.budget || 'Not provided')}</span></div>
+            <div class="wa-summary-line"><span class="wa-summary-label">💬 Question:</span> <span class="wa-summary-val">${escapeHtml(leadState.question || 'Not provided')}</span></div>
+          </div>
+
+          <a href="${whatsappURL}" target="_blank" rel="noopener" class="wa-send-enquiry-btn">
+            <svg viewBox="0 0 32 32" width="20" height="20" fill="none"><path fill="#FFFFFF" d="M16 2A13 13 0 0 0 4.68 20.88L3 27l6.29-1.65A13 13 0 1 0 16 2zm0 23.6a10.55 10.55 0 0 1-5.38-1.47l-.39-.23-4 1.05 1.07-3.9-.25-.4A10.59 10.59 0 1 1 16 25.6zm5.8-7.92c-.32-.16-1.89-.93-2.18-1.04s-.5-.16-.72.16-.84 1.04-1.03 1.26-.38.25-.7.09a8.84 8.84 0 0 1-2.6-1.6 9.77 9.77 0 0 1-1.8-2.24c-.19-.32-.02-.5.14-.66s.32-.38.48-.57a2.16 2.16 0 0 0 .32-.53.59.59 0 0 0-.03-.56c-.08-.16-.72-1.74-.99-2.38s-.53-.55-.72-.56h-.62a1.2 1.2 0 0 0-.87.4 3.65 3.65 0 0 0-1.14 2.71A6.36 6.36 0 0 0 10.4 17a14.54 14.54 0 0 0 5.56 4.92c.76.33 1.35.53 1.81.68a4.35 4.35 0 0 0 2 .12 3.28 3.28 0 0 0 2.15-1.52 2.68 2.68 0 0 0 .19-1.52c-.07-.12-.24-.2-.56-.36z"/></svg>
+            Send Enquiry on WhatsApp
+          </a>
+        </div>
+        <div class="whatsapp-msg-time">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+      </div>
+    `;
+    chatBody.insertAdjacentHTML('beforeend', summaryHtml);
+    chatBody.scrollTop = chatBody.scrollHeight;
+  }
+
+  function appendUserMsg(msgText) {
+    const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const userHtml = `
+      <div class="whatsapp-msg whatsapp-msg-user">
+        <div class="whatsapp-msg-bubble">${escapeHtml(msgText)}</div>
+        <div class="whatsapp-msg-time">${timeStr}</div>
+      </div>
+    `;
+    chatBody.insertAdjacentHTML('beforeend', userHtml);
+    chatBody.scrollTop = chatBody.scrollHeight;
+  }
+
+  function appendBotMsg(msgHtml, quickChips = null) {
+    const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    let chipsHtml = '';
+    if (quickChips && quickChips.length) {
+      chipsHtml = `
+        <div class="whatsapp-quick-chips" style="margin-top: 0.5rem;">
+          ${quickChips.map(c => `<button class="wa-chip-btn dynamic-chip" data-val="${escapeHtml(c.val)}">${escapeHtml(c.text)}</button>`).join('')}
+        </div>
+      `;
+    }
+
+    const currentWaUrl = generateWhatsAppURL(leadState);
+    const directSendBtnHtml = `
+      <a href="${currentWaUrl}" target="_blank" rel="noopener" class="wa-send-enquiry-btn" style="margin-top: 0.6rem; padding: 0.65rem 0.85rem; font-size: 0.82rem;">
+        💬 Send Enquiry on WhatsApp
+      </a>
+    `;
+
+    const botHtml = `
+      <div class="whatsapp-msg whatsapp-msg-bot">
+        <div class="whatsapp-msg-bubble">
+          ${msgHtml}
+          ${chipsHtml}
+          ${directSendBtnHtml}
+        </div>
+        <div class="whatsapp-msg-time">${timeStr}</div>
+      </div>
+    `;
+    chatBody.insertAdjacentHTML('beforeend', botHtml);
+
+    // Attach click listeners to dynamic chips
+    chatBody.querySelectorAll('.dynamic-chip').forEach(chip => {
+      chip.addEventListener('click', function() {
+        const val = this.getAttribute('data-val');
+        appendUserMsg(val);
+        processUserInput(val);
+      }, { once: true });
+    });
+
+    chatBody.scrollTop = chatBody.scrollHeight;
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+  }
 }
