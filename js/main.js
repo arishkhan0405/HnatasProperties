@@ -50,11 +50,77 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* ==========================================================================
-   0. HERO ESTATE BACKGROUND SWITCHER
+   0. HERO ESTATE BACKGROUND SWITCHER & DYNAMIC PROJECT CONTENT
    ========================================================================== */
+const HERO_PROJECTS_DATA = {
+  'crystal': {
+    bg: 'Images/crystal.jpg',
+    badge: 'பஞ்சப்பூர் அருகே • DTCP &amp; RERA APPROVED PLOTS • NAGAMANGALAM, TRICHY',
+    title: `MRpropertys' <br><span class="gold-gradient-text">CRYSTAL</span>`,
+    subtitle: `பஞ்சப்பூர் அருகே DTCP &amp; RERA Approved Plots @ Nagamangalam, Trichy. Just 9.5 KM from Panjapur New Bus Terminal &amp; 3.5 KM from Trichy - Madurai NH. Nearby SFS Matriculation, Chellammal &amp; State Board Schools, Harshamithra Hospital.`,
+    offer: `<i data-lucide="sparkles" style="width: 15px; height: 15px; color: var(--gold-primary);"></i> <span>Special Offer: <strong>₹850/- Per Sq.Ft</strong> • <strong>Registration + Patta FREE!</strong></span>`,
+    propName: 'Crystal Site Visit Request',
+    metrics: [
+      { number: '₹850/-', label: 'Per Sq.Ft Special Offer' },
+      { number: '9.5 KM', label: 'From Panjapur Bus Stand' },
+      { number: '3.5 KM', label: 'From Trichy - Madurai NH' },
+      { number: 'FREE', label: 'Registration + Patta Free', highlight: '#10b981' }
+    ]
+  },
+  'grand-empire': {
+    bg: 'Images/Hero page.png',
+    badge: 'DTCP APPROVED NO: 109/2026 • RERA APPROVED • TRICHY - MADURAI NH',
+    title: `MRpropertys' <br><span class="gold-gradient-text">GRAND EMPIRE</span>`,
+    subtitle: `Royal Land for Royal People! Premier 21-Acre Gated Lifestyle Layout with 395 Approved Plots @ Manikandam, Trichy. Adjacent to Panjapur Integrated New Bus Terminal with 16 Live Night-Vision CCTV App, Magizh Mutram &amp; 100% Bank Loan Facility.`,
+    offer: `<i data-lucide="award" style="width: 15px; height: 15px; color: var(--gold-primary);"></i> <span>Grand Empire: <strong>395 Approved Plots</strong> • <strong>21-Acre Gated Township</strong></span>`,
+    propName: 'Grand Empire Site Visit Request',
+    metrics: [
+      { number: '21 Acres', label: 'Total Gated Township' },
+      { number: '395 Plots', label: 'DTCP &amp; RERA Approved' },
+      { number: '16 CCTVs', label: '24x7 Live Stream App' },
+      { number: '100%', label: 'Bank Loan Facility' }
+    ]
+  },
+  'akshayam': {
+    bg: 'Images/akshayam.jpg',
+    badge: 'பஞ்சப்பூர் அருகே • DTCP APPROVED 131/2026 • RERA APPROVED',
+    title: `Green Valley's <br><span class="gold-gradient-text">AKSHAYAM</span>`,
+    subtitle: `அக்ஷயம் செழிப்பாக்கும்! Premier Villa Plots @ Manikandam, Trichy. DTCP Approved (No: 131/2026) &amp; RERA Approved layout with top luxury amenities, ready for immediate construction &amp; massive value appreciation.`,
+    offer: `<i data-lucide="star" style="width: 15px; height: 15px; color: var(--gold-primary);"></i> <span>Akshayam: <strong>DTCP Appr. 131/2026</strong> • <strong>Premium Villa Plots</strong></span>`,
+    propName: 'Akshayam Site Visit Request',
+    metrics: [
+      { number: '131/2026', label: 'DTCP Approval No' },
+      { number: 'Premium', label: 'Villa Plots Township' },
+      { number: '100%', label: 'Clear Title & Approved' },
+      { number: 'High ROI', label: 'High Growth Zone' }
+    ]
+  },
+  'kings-avenue': {
+    bg: 'Images/kings-avenue.jpg',
+    badge: 'DTCP &amp; RERA APPROVED • 33FT THAR ROADS • TRICHY',
+    title: `MRpropertys' <br><span class="gold-gradient-text">KINGS AVENUE</span>`,
+    subtitle: `Exclusive residential community with 33ft wide blacktop thar roads, grand entrance arch, secure compound walls, clear titles, and supreme connectivity on Trichy - Madurai Highway.`,
+    offer: `<i data-lucide="crown" style="width: 15px; height: 15px; color: var(--gold-primary);"></i> <span>Kings Avenue: <strong>33ft Wide Blacktop Roads</strong> • <strong>Gated Layout</strong></span>`,
+    propName: 'Kings Avenue Site Visit Request',
+    metrics: [
+      { number: '33 Feet', label: 'Blacktop Thar Roads' },
+      { number: '100%', label: 'Bank Loan Approved' },
+      { number: 'Gated', label: 'Compound Wall Secured' },
+      { number: 'Prime', label: 'Trichy Highway Access' }
+    ]
+  }
+};
+
 function initHeroEstateSwitcher() {
   const switcherBtns = document.querySelectorAll('.hero-switcher-btn');
   const heroBgImg = document.getElementById('hero-bg-image');
+  const heroBadge = document.getElementById('hero-badge');
+  const heroTitle = document.getElementById('hero-title');
+  const heroSubtitle = document.getElementById('hero-subtitle');
+  const heroOffer = document.getElementById('hero-offer');
+  const heroMetrics = document.getElementById('hero-metrics');
+  const heroBookBtn = document.getElementById('hero-book-btn');
+
   if (!switcherBtns.length || !heroBgImg) return;
 
   switcherBtns.forEach((btn) => {
@@ -62,22 +128,53 @@ function initHeroEstateSwitcher() {
       switcherBtns.forEach((b) => b.classList.remove('active'));
       btn.classList.add('active');
 
-      const newBg = btn.getAttribute('data-bg');
-      const title = btn.getAttribute('data-title');
-      const price = btn.getAttribute('data-price');
+      const projectKey = btn.getAttribute('data-project');
+      const projectData = HERO_PROJECTS_DATA[projectKey];
+
+      const newBg = projectData ? projectData.bg : btn.getAttribute('data-bg');
+      const title = btn.getAttribute('data-title') || (projectData ? projectData.title : '');
 
       if (newBg) {
-        heroBgImg.style.opacity = '0.3';
+        heroBgImg.style.opacity = '0.2';
         heroBgImg.style.transform = 'scale(1.15)';
         setTimeout(() => {
           heroBgImg.src = newBg;
           heroBgImg.style.opacity = '1';
           heroBgImg.style.transform = 'scale(1.05)';
-        }, 250);
+        }, 220);
       }
 
-      if (title && price) {
-        showToast(`Hero Featured: ${title} (${price})`);
+      if (projectData) {
+        if (heroBadge) {
+          heroBadge.innerHTML = `<span class="pill-dot"></span><span>${projectData.badge}</span>`;
+        }
+        if (heroTitle) {
+          heroTitle.innerHTML = projectData.title;
+        }
+        if (heroSubtitle) {
+          heroSubtitle.innerHTML = projectData.subtitle;
+        }
+        if (heroOffer) {
+          heroOffer.innerHTML = projectData.offer;
+        }
+        if (heroBookBtn) {
+          heroBookBtn.setAttribute('data-prop-name', projectData.propName);
+        }
+        if (heroMetrics && projectData.metrics) {
+          heroMetrics.innerHTML = projectData.metrics.map(m => `
+            <div class="metric-card">
+              <div class="metric-number" ${m.highlight ? `style="color: ${m.highlight};"` : ''}>${m.number}</div>
+              <div class="metric-label">${m.label}</div>
+            </div>
+          `).join('');
+        }
+        if (typeof lucide !== 'undefined') {
+          lucide.createIcons();
+        }
+      }
+
+      if (title) {
+        showToast(`Featured Project: ${title.replace(/<[^>]*>?/gm, '')}`);
       }
     });
   });

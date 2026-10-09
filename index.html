@@ -84,7 +84,7 @@
     <section id="hero" class="hero-section">
       <!-- Background Imagery Layer with Ken Burns Effect -->
       <div class="hero-bg-image-layer">
-        <img id="hero-bg-image" src="Images/Hero page.png" alt="MRpropertys Grand Empire Royal Gateway" class="hero-bg-img">
+        <img id="hero-bg-image" src="Images/crystal.jpg" alt="MRpropertys Crystal Project Nagamangalam Trichy" class="hero-bg-img">
         <div class="hero-gradient-overlay"></div>
       </div>
 
@@ -94,62 +94,67 @@
         <div class="hero-content">
           <!-- Real Estate Showcase Quick Selector -->
           <div class="hero-estate-switcher">
-            <button class="hero-switcher-btn active" data-bg="Images/Hero page.png" data-title="Royal Gateway Entrance">
-              <i data-lucide="shield-check" style="width: 12px; height: 12px; display: inline;"></i> Royal Arch Entrance
+            <button class="hero-switcher-btn" data-project="grand-empire" data-bg="Images/Hero page.png" data-title="Grand Empire">
+              <i data-lucide="shield-check" style="width: 12px; height: 12px; display: inline;"></i> Grand Empire
             </button>
-            <button class="hero-switcher-btn" data-bg="Images/WhatsApp Image 2026-09-27 at 8.09.23 AM (2).jpeg" data-title="DTCP & RERA Master Layout Map">
-              <i data-lucide="map" style="width: 12px; height: 12px; display: inline;"></i> Master Layout Plan
+            <button class="hero-switcher-btn" data-project="akshayam" data-bg="Images/akshayam.jpg" data-title="Akshayam Project">
+              <i data-lucide="home" style="width: 12px; height: 12px; display: inline;"></i> Akshayam Project
             </button>
-            <button class="hero-switcher-btn" data-bg="Images/WhatsApp Image 2026-09-27 at 8.10.06 AM.jpeg" data-title="33ft Blacktop Thar Roads">
-              <i data-lucide="road" style="width: 12px; height: 12px; display: inline;"></i> 33ft Thar Roads
+            <button class="hero-switcher-btn" data-project="kings-avenue" data-bg="Images/kings-avenue.jpg" data-title="Kings Avenue">
+              <i data-lucide="crown" style="width: 12px; height: 12px; display: inline;"></i> Kings Avenue
             </button>
-            <button class="hero-switcher-btn" data-bg="Images/WhatsApp Image 2026-09-27 at 8.11.08 AM.jpeg" data-title="Aerial Layout View">
-              <i data-lucide="droplet" style="width: 12px; height: 12px; display: inline;"></i> Layout Aerial View
+            <button class="hero-switcher-btn active" data-project="crystal" data-bg="Images/crystal.jpg" data-title="Crystal Project">
+              <i data-lucide="gem" style="width: 12px; height: 12px; display: inline;"></i> Crystal
             </button>
           </div>
 
-          <div class="hero-badge-pill">
+          <div class="hero-badge-pill" id="hero-badge">
             <span class="pill-dot"></span>
-            <span>DTCP APPROVED NO: 109/2026 • RERA APPROVED • TRICHY - MADURAI NH</span>
+            <span>பஞ்சப்பூர் அருகே • DTCP &amp; RERA APPROVED PLOTS • NAGAMANGALAM, TRICHY</span>
           </div>
 
-          <h1 class="hero-title">
+          <h1 class="hero-title" id="hero-title">
             MRpropertys' <br>
-            <span class="gold-gradient-text">GRAND EMPIRE</span>
+            <span class="gold-gradient-text">CRYSTAL</span>
           </h1>
 
-          <p class="hero-subtitle">
-            Royal Land for Royal People! Premier 21-Acre Gated Lifestyle Layout with 395 Approved Plots @ Manikandam, Trichy. Adjacent to Panjapur Integrated New Bus Terminal with 16 Live Night-Vision CCTV App, Magizh Mutram & 100% Bank Loan Facility.
+          <p class="hero-subtitle" id="hero-subtitle">
+            பஞ்சப்பூர் அருகே DTCP &amp; RERA Approved Plots @ Nagamangalam, Trichy. Just 9.5 KM from Panjapur New Bus Terminal &amp; 3.5 KM from Trichy - Madurai NH. Nearby SFS Matriculation, Chellammal &amp; State Board Schools, Harshamithra Hospital.
           </p>
+
+          <div class="hero-offer-badge" id="hero-offer">
+            <i data-lucide="sparkles" style="width: 15px; height: 15px; color: var(--gold-primary);"></i>
+            <span>Special Offer: <strong>₹850/- Per Sq.Ft</strong> • <strong>Registration + Patta FREE!</strong></span>
+          </div>
 
           <div class="hero-cta-group">
             <a href="#properties" class="btn btn-primary btn-lg">
               <span>Explore Plot Layout</span>
               <i data-lucide="arrow-right" style="width: 18px; height: 18px;"></i>
             </a>
-            <button class="btn btn-secondary btn-lg open-booking-modal-btn" data-prop-name="Hero Site Visit Request">
+            <button class="btn btn-secondary btn-lg open-booking-modal-btn" id="hero-book-btn" data-prop-name="Crystal Site Visit Request">
               <i data-lucide="calendar" style="width: 18px; height: 18px; color: var(--gold-light);"></i>
               <span>Book Free Site Visit</span>
             </button>
           </div>
 
           <!-- Hero Metrics Bar -->
-          <div class="hero-metrics-grid">
+          <div class="hero-metrics-grid" id="hero-metrics">
             <div class="metric-card">
-              <div class="metric-number" data-counter-target="21" data-counter-suffix=" Acres">21 Acres</div>
-              <div class="metric-label">Total Gated Township</div>
+              <div class="metric-number">₹850/-</div>
+              <div class="metric-label">Per Sq.Ft Special Offer</div>
             </div>
             <div class="metric-card">
-              <div class="metric-number" data-counter-target="395" data-counter-suffix=" Plots">395 Plots</div>
-              <div class="metric-label">DTCP & RERA Approved</div>
+              <div class="metric-number">9.5 KM</div>
+              <div class="metric-label">From Panjapur Bus Stand</div>
             </div>
             <div class="metric-card">
-              <div class="metric-number" data-counter-target="16" data-counter-suffix=" Cameras">16 CCTVs</div>
-              <div class="metric-label">24x7 Live Stream App</div>
+              <div class="metric-number">3.5 KM</div>
+              <div class="metric-label">From Trichy - Madurai NH</div>
             </div>
             <div class="metric-card">
-              <div class="metric-number" data-counter-target="100" data-counter-suffix="%">100%</div>
-              <div class="metric-label">Bank Loan Facility</div>
+              <div class="metric-number" style="color: #10b981;">FREE</div>
+              <div class="metric-label">Registration + Patta Free</div>
             </div>
           </div>
 
