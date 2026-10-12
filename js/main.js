@@ -47,28 +47,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 15. Interactive WhatsApp VIP Chatbot Engine
   initWhatsAppChatbot();
+
+  // 16. About Project Interactive Multi-Project Slideshow Engine
+  initAboutProjectSlideshow();
 });
 
 /* ==========================================================================
    0. HERO ESTATE BACKGROUND SWITCHER & DYNAMIC PROJECT CONTENT
    ========================================================================== */
 const HERO_PROJECTS_DATA = {
-  'crystal': {
-    bg: 'Images/crystal.jpg',
-    badge: 'பஞ்சப்பூர் அருகே • DTCP &amp; RERA APPROVED PLOTS • NAGAMANGALAM, TRICHY',
-    title: `MRpropertys' <br><span class="gold-gradient-text">CRYSTAL</span>`,
-    subtitle: `பஞ்சப்பூர் அருகே DTCP &amp; RERA Approved Plots @ Nagamangalam, Trichy. Just 9.5 KM from Panjapur New Bus Terminal &amp; 3.5 KM from Trichy - Madurai NH. Nearby SFS Matriculation, Chellammal &amp; State Board Schools, Harshamithra Hospital.`,
-    offer: `<i data-lucide="sparkles" style="width: 15px; height: 15px; color: var(--gold-primary);"></i> <span>Special Offer: <strong>₹850/- Per Sq.Ft</strong> • <strong>Registration + Patta FREE!</strong></span>`,
-    propName: 'Crystal Site Visit Request',
-    metrics: [
-      { number: '₹850/-', label: 'Per Sq.Ft Special Offer' },
-      { number: '9.5 KM', label: 'From Panjapur Bus Stand' },
-      { number: '3.5 KM', label: 'From Trichy - Madurai NH' },
-      { number: 'FREE', label: 'Registration + Patta Free', highlight: '#10b981' }
-    ]
+  'mrproperties': {
+    bg: 'Images/Hero page.png',
+    badge: 'PREMIER REAL ESTATE DEVELOPER • TRICHY',
+    title: `<span class="gold-gradient-text">MRPROPERTIES</span>`,
+    subtitle: `<span style="display: block; font-size: 1.35rem; font-weight: 800; color: #926207; margin-bottom: 0.6rem; font-family: var(--font-heading-cinzel); letter-spacing: 0.02em;">Your Future Begins with the Right Property.</span>Discover four exclusive property projects in Trichy — Grand Empire, Akshayam, Kings Avenue &amp; Crystal.`,
+    offer: '',
+    propName: 'MRproperties General Inquiry',
+    metrics: []
   },
   'grand-empire': {
-    bg: 'Images/Hero page.png',
+    bg: 'Images/grand-empire-2.jpg',
     badge: 'DTCP APPROVED NO: 109/2026 • RERA APPROVED • TRICHY - MADURAI NH',
     title: `MRpropertys' <br><span class="gold-gradient-text">GRAND EMPIRE</span>`,
     subtitle: `Royal Land for Royal People! Premier 21-Acre Gated Lifestyle Layout with 395 Approved Plots @ Manikandam, Trichy. Adjacent to Panjapur Integrated New Bus Terminal with 16 Live Night-Vision CCTV App, Magizh Mutram &amp; 100% Bank Loan Facility.`,
@@ -84,7 +82,7 @@ const HERO_PROJECTS_DATA = {
   'akshayam': {
     bg: 'Images/akshayam.jpg',
     badge: 'பஞ்சப்பூர் அருகே • DTCP APPROVED 131/2026 • RERA APPROVED',
-    title: `Green Valley's <br><span class="gold-gradient-text">AKSHAYAM</span>`,
+    title: `MRpropertys' <br><span class="gold-gradient-text">AKSHAYAM</span>`,
     subtitle: `அக்ஷயம் செழிப்பாக்கும்! Premier Villa Plots @ Manikandam, Trichy. DTCP Approved (No: 131/2026) &amp; RERA Approved layout with top luxury amenities, ready for immediate construction &amp; massive value appreciation.`,
     offer: `<i data-lucide="star" style="width: 15px; height: 15px; color: var(--gold-primary);"></i> <span>Akshayam: <strong>DTCP Appr. 131/2026</strong> • <strong>Premium Villa Plots</strong></span>`,
     propName: 'Akshayam Site Visit Request',
@@ -107,6 +105,20 @@ const HERO_PROJECTS_DATA = {
       { number: '100%', label: 'Bank Loan Approved' },
       { number: 'Gated', label: 'Compound Wall Secured' },
       { number: 'Prime', label: 'Trichy Highway Access' }
+    ]
+  },
+  'crystal': {
+    bg: 'Images/crystal.jpg',
+    badge: 'பஞ்சப்பூர் அருகே • DTCP &amp; RERA APPROVED PLOTS • NAGAMANGALAM, TRICHY',
+    title: `MRpropertys' <br><span class="gold-gradient-text">CRYSTAL</span>`,
+    subtitle: `பஞ்சப்பூர் அருகே DTCP &amp; RERA Approved Plots @ Nagamangalam, Trichy. Just 9.5 KM from Panjapur New Bus Terminal &amp; 3.5 KM from Trichy - Madurai NH. Nearby SFS Matriculation, Chellammal &amp; State Board Schools, Harshamithra Hospital.`,
+    offer: `<i data-lucide="sparkles" style="width: 15px; height: 15px; color: var(--gold-primary);"></i> <span>Special Offer: <strong>₹850/- Per Sq.Ft</strong> • <strong>Registration + Patta FREE!</strong></span>`,
+    propName: 'Crystal Site Visit Request',
+    metrics: [
+      { number: '₹850/-', label: 'Per Sq.Ft Special Offer' },
+      { number: '9.5 KM', label: 'From Panjapur Bus Stand' },
+      { number: '3.5 KM', label: 'From Trichy - Madurai NH' },
+      { number: 'FREE', label: 'Registration + Patta Free', highlight: '#10b981' }
     ]
   }
 };
@@ -155,18 +167,30 @@ function initHeroEstateSwitcher() {
           heroSubtitle.innerHTML = projectData.subtitle;
         }
         if (heroOffer) {
-          heroOffer.innerHTML = projectData.offer;
+          if (projectData.offer) {
+            heroOffer.innerHTML = projectData.offer;
+            heroOffer.style.display = 'inline-flex';
+          } else {
+            heroOffer.innerHTML = '';
+            heroOffer.style.display = 'none';
+          }
         }
         if (heroBookBtn) {
           heroBookBtn.setAttribute('data-prop-name', projectData.propName);
         }
-        if (heroMetrics && projectData.metrics) {
-          heroMetrics.innerHTML = projectData.metrics.map(m => `
-            <div class="metric-card">
-              <div class="metric-number" ${m.highlight ? `style="color: ${m.highlight};"` : ''}>${m.number}</div>
-              <div class="metric-label">${m.label}</div>
-            </div>
-          `).join('');
+        if (heroMetrics) {
+          if (projectData.metrics && projectData.metrics.length > 0) {
+            heroMetrics.style.display = 'grid';
+            heroMetrics.innerHTML = projectData.metrics.map(m => `
+              <div class="metric-card">
+                <div class="metric-number" ${m.highlight ? `style="color: ${m.highlight};"` : ''}>${m.number}</div>
+                <div class="metric-label">${m.label}</div>
+              </div>
+            `).join('');
+          } else {
+            heroMetrics.innerHTML = '';
+            heroMetrics.style.display = 'none';
+          }
         }
         if (typeof lucide !== 'undefined') {
           lucide.createIcons();
@@ -176,8 +200,115 @@ function initHeroEstateSwitcher() {
       if (title) {
         showToast(`Featured Project: ${title.replace(/<[^>]*>?/gm, '')}`);
       }
+
+      // Synchronize About Project Slideshow with selected Hero project
+      if (typeof window.switchAboutProject === 'function') {
+        window.switchAboutProject(projectKey);
+      }
     });
   });
+}
+
+/* ==========================================================================
+   0.5. ABOUT PROJECT MULTI-PROJECT INTERACTIVE SLIDESHOW ENGINE
+   ========================================================================== */
+function initAboutProjectSlideshow() {
+  const slides = document.querySelectorAll('.about-slide');
+  const tabs = document.querySelectorAll('.about-tab-btn');
+  const dots = document.querySelectorAll('.about-dot');
+  const prevBtn = document.getElementById('about-prev-btn');
+  const nextBtn = document.getElementById('about-next-btn');
+  const counterEl = document.getElementById('about-current-slide');
+
+  if (!slides.length) return;
+
+  let currentIndex = 0;
+  const projectIndexMap = {
+    'grand-empire': 0,
+    'akshayam': 1,
+    'kings-avenue': 2,
+    'crystal': 3
+  };
+
+  function showSlide(index) {
+    if (index < 0) index = slides.length - 1;
+    if (index >= slides.length) index = 0;
+    currentIndex = index;
+
+    slides.forEach((slide, i) => {
+      if (i === currentIndex) {
+        slide.classList.add('active');
+      } else {
+        slide.classList.remove('active');
+      }
+    });
+
+    tabs.forEach((tab, i) => {
+      if (i === currentIndex) {
+        tab.classList.add('active');
+        tab.setAttribute('aria-selected', 'true');
+      } else {
+        tab.classList.remove('active');
+        tab.setAttribute('aria-selected', 'false');
+      }
+    });
+
+    dots.forEach((dot, i) => {
+      if (i === currentIndex) {
+        dot.classList.add('active');
+      } else {
+        dot.classList.remove('active');
+      }
+    });
+
+    if (counterEl) {
+      counterEl.textContent = String(currentIndex + 1).padStart(2, '0');
+    }
+
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
+  }
+
+  // Tabs click handler
+  tabs.forEach((tab) => {
+    tab.addEventListener('click', () => {
+      const slideIdx = parseInt(tab.getAttribute('data-slide'), 10);
+      if (!isNaN(slideIdx)) {
+        showSlide(slideIdx);
+      }
+    });
+  });
+
+  // Dots click handler
+  dots.forEach((dot) => {
+    dot.addEventListener('click', () => {
+      const slideIdx = parseInt(dot.getAttribute('data-slide'), 10);
+      if (!isNaN(slideIdx)) {
+        showSlide(slideIdx);
+      }
+    });
+  });
+
+  // Next / Prev button handlers
+  if (prevBtn) {
+    prevBtn.addEventListener('click', () => {
+      showSlide(currentIndex - 1);
+    });
+  }
+
+  if (nextBtn) {
+    nextBtn.addEventListener('click', () => {
+      showSlide(currentIndex + 1);
+    });
+  }
+
+  // Global bridge function callable by Hero Switcher
+  window.switchAboutProject = function(projectKey) {
+    if (projectKey in projectIndexMap) {
+      showSlide(projectIndexMap[projectKey]);
+    }
+  };
 }
 
 /* ==========================================================================
@@ -362,47 +493,249 @@ function updateAllPrices(currency) {
 }
 
 /* ==========================================================================
-   6. INTERACTIVE 360 SHOWCASE
+   6. INTERACTIVE 4-PROJECT MASTER LAYOUT EXPLORER
    ========================================================================== */
+const PROJECT_LAYOUTS_DATA = {
+  'grand-empire': {
+    name: 'Grand Empire 21-Acre Layout Plan',
+    loc: 'Manikandam, Trichy-Madurai NH — Adjacent to Panjapur Integrated New Bus Terminal',
+    badge: 'DTCP NO: 109/2026 • 21 ACRES • 395 PLOTS',
+    blueprintImg: 'Images/WhatsApp Image 2026-09-27 at 8.09.23 AM (2).jpeg',
+    groundImg: 'Images/WhatsApp Image 2026-09-27 at 8.11.08 AM (1).jpeg',
+    propName: 'Grand Empire Master Layout Consultation',
+    tags: ['Cholan Salai: 33ft Main Avenue', 'Pandiyan Salai: Commercial Link', 'Cheran Salai: Residential Boulevard', 'Magizh Mutram & Sparta Park Zone'],
+    hotspots: [
+      { top: '40%', left: '30%', title: 'Magizh Mutram World', desc: '2-Acre entertainment zone featuring "The Baiae" gaming lounge, Gully Cricket pitch & Badminton court.' },
+      { top: '55%', left: '65%', title: 'Sparta Exercise Park', desc: 'Open gym with 10+ workout equipments, 8-shaped walking track, Bamboo oxygen forest & Mooligai Kaadu.' },
+      { top: '35%', left: '80%', title: 'Spiritual Sanctum', desc: 'Sri Selva Vinayagar Temple, Interfaith Prayer Hall, Tulasi Vanam & Nilavu Medai Amphitheatre.' },
+      { top: '25%', left: '50%', title: '16 Night-Vision CCTVs', desc: '24x7 Live Stream mobile app connectivity for round-the-clock gated township security.' }
+    ]
+  },
+  'akshayam': {
+    name: 'Akshayam Premier Villa Plots Layout',
+    loc: 'Manikandam, Trichy — DTCP 131/2026 Approved Villa Community',
+    badge: 'DTCP NO: 131/2026 APPROVED • PREMIER VILLA PLOTS',
+    blueprintImg: 'Images/akshayam.jpg',
+    groundImg: 'Images/WhatsApp Image 2026-09-27 at 8.10.11 AM (1).jpeg',
+    propName: 'Akshayam Villa Plots Layout Consultation',
+    tags: ['DTCP 131/2026 Approved', '33ft Wide Blacktop Roads', 'Ready for Villa Construction', 'Panjapur Terminal Proximity'],
+    hotspots: [
+      { top: '38%', left: '42%', title: 'DTCP Approved 131/2026', desc: 'Legally vetted, DTCP & RERA approved demarcated villa plots with clear title deeds.' },
+      { top: '50%', left: '68%', title: '33ft Wide Blacktop Roads', desc: 'Smooth, durable internal roads designed for seamless vehicular access and luxury living.' },
+      { top: '30%', left: '78%', title: 'Ready for Construction', desc: 'Leveled fertile red soil ready for immediate luxury villa building with sweet potable groundwater.' },
+      { top: '60%', left: '28%', title: 'High Growth Corridor', desc: 'Just minutes from Panjapur Integrated Bus Terminal with phenomenal ROI appreciation.' }
+    ]
+  },
+  'kings-avenue': {
+    name: 'Kings Avenue 33ft Thar Road Layout',
+    loc: 'Trichy - Madurai Highway Frontage — Premier Gated Community',
+    badge: '33FT THAR ROADS • GATED TOWNSHIP • DTCP & RERA',
+    blueprintImg: 'Images/kings-avenue.jpg',
+    groundImg: 'Images/WhatsApp Image 2026-09-27 at 8.10.04 AM.jpeg',
+    propName: 'Kings Avenue 33ft Thar Road Layout Consultation',
+    tags: ['33ft Heavy-Duty Blacktop Thar Roads', 'Full Gated Perimeter Compound Wall', 'Grand Architectural Entrance Arch', 'Direct Trichy-Madurai NH Access'],
+    hotspots: [
+      { top: '48%', left: '50%', title: '33ft Heavy-Duty Blacktop Road', desc: 'Engineered heavy-duty blacktop thar roads with reinforced concrete curb stones.' },
+      { top: '35%', left: '82%', title: 'Gated Perimeter Compound Wall', desc: 'Fully enclosed high-security precast compound wall surrounding the entire community.' },
+      { top: '28%', left: '25%', title: 'Trichy-Madurai NH Frontage', desc: 'Direct fast accessibility to Trichy International Airport, Madurai NH, and city center.' },
+      { top: '65%', left: '60%', title: 'Clear Individual Titles', desc: 'Bank loan approved with instant registration readiness and individual Patta transfer.' }
+    ]
+  },
+  'crystal': {
+    name: 'Crystal Residential Community Layout',
+    loc: 'Nagamangalam, Trichy — 9.5 KM from Panjapur New Bus Terminal',
+    badge: 'SPECIAL OFFER ₹850/SQ.FT • FREE REGISTRATION + PATTA',
+    blueprintImg: 'Images/crystal.jpg',
+    groundImg: 'Images/crystal.jpg',
+    propName: 'Crystal Layout Consultation & ₹850 Offer Booking',
+    tags: ['Special Offer ₹850/Sq.Ft', '100% Free Registration + Free Patta', '9.5 KM from Panjapur Bus Terminal', 'Near SFS & Chellammal Schools'],
+    hotspots: [
+      { top: '45%', left: '20%', title: 'Special Offer ₹850/- Per Sq.Ft', desc: 'Unbeatable value pricing in Trichy’s fastest growing residential zone.' },
+      { top: '38%', left: '65%', title: '100% FREE Registration & Patta', desc: 'Zero extra registration costs — complete legal registration & Patta included free.' },
+      { top: '55%', left: '45%', title: 'Educational & Medical Hub', desc: 'Close proximity to SFS Matriculation, Chellammal schools, and Harshamithra Hospital.' },
+      { top: '25%', left: '80%', title: 'Strategic Nagamangalam Link', desc: 'Only 3.5 KM from Trichy - Madurai NH and 9.5 KM from Panjapur New Bus Stand.' }
+    ]
+  }
+};
+
+let currentLayoutKey = 'grand-empire';
+let currentLayoutMode = 'blueprint';
+
 function init360Showcase() {
-  const panoramicImg = document.querySelector('.showcase-bg-panoramic');
+  const layoutImg = document.getElementById('layout-viewer-img');
   const container = document.querySelector('.showcase-viewer-container');
-  if (!panoramicImg || !container) return;
+  const hotspotsContainer = document.getElementById('layout-hotspots-container');
+  const badgeEl = document.getElementById('layout-viewer-badge');
+  const titleEl = document.getElementById('layout-viewer-title');
+  const descEl = document.getElementById('layout-viewer-desc');
+  const inquiryBtn = document.getElementById('layout-inquiry-btn');
+  const tabBtns = document.querySelectorAll('.layout-tab-btn');
+  const cardSwitchBtns = document.querySelectorAll('.switch-layout-card-btn');
+  const modeBlueprintBtn = document.getElementById('layout-mode-blueprint-btn');
+  const modeGroundBtn = document.getElementById('layout-mode-ground-btn');
+  const modalTriggerBtn = document.getElementById('layout-modal-trigger-btn');
 
-  let isDown = false;
-  let startX;
-  let scrollLeft = 0;
-  let currentPos = 50;
+  function renderLayout(key) {
+    currentLayoutKey = key;
+    const data = PROJECT_LAYOUTS_DATA[key];
+    if (!data) return;
 
-  container.addEventListener('mousedown', (e) => {
-    isDown = true;
-    startX = e.pageX - container.offsetLeft;
-    container.style.cursor = 'grabbing';
-  });
+    tabBtns.forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-layout') === key);
+    });
 
-  window.addEventListener('mouseup', () => {
-    isDown = false;
-    container.style.cursor = 'grab';
-  });
+    if (layoutImg) {
+      layoutImg.style.opacity = '0.3';
+      setTimeout(() => {
+        layoutImg.src = currentLayoutMode === 'blueprint' ? data.blueprintImg : data.groundImg;
+        layoutImg.style.opacity = '1';
+      }, 180);
+    }
 
-  container.addEventListener('mousemove', (e) => {
-    if (!isDown) return;
-    e.preventDefault();
-    const x = e.pageX - container.offsetLeft;
-    const walk = (x - startX) * 0.08;
-    currentPos = Math.max(0, Math.min(100, currentPos - walk));
-    panoramicImg.style.objectPosition = `${currentPos}% center`;
-    startX = x;
-  });
+    if (badgeEl) {
+      badgeEl.innerHTML = `<i data-lucide="orbit" style="width: 12px; height: 12px;"></i><span>${data.badge}</span>`;
+    }
+    if (titleEl) titleEl.textContent = data.name;
+    if (descEl) descEl.textContent = data.loc;
+    if (inquiryBtn) inquiryBtn.setAttribute('data-prop-name', data.propName);
 
-  // Hotspot click modal triggers
-  const hotspots = document.querySelectorAll('.hotspot-pin');
-  hotspots.forEach((spot) => {
-    spot.addEventListener('click', () => {
-      const room = spot.getAttribute('data-room-name') || 'Master Suite';
-      showToast(`Viewing 360° Spotlight: ${room}`);
+    if (hotspotsContainer) {
+      hotspotsContainer.innerHTML = data.hotspots.map(spot => `
+        <div class="hotspot-pin" style="top: ${spot.top}; left: ${spot.left};" data-room-name="${spot.title}">
+          <div class="hotspot-core"><i data-lucide="plus" style="width: 14px; height: 14px;"></i></div>
+          <div class="hotspot-card-tooltip">
+            <strong style="color: var(--gold-light); display: block; margin-bottom: 4px;">${spot.title}</strong>
+            <p style="font-size: 0.8rem; color: #cbd5e1; margin: 0;">${spot.desc}</p>
+          </div>
+        </div>
+      `).join('');
+
+      hotspotsContainer.querySelectorAll('.hotspot-pin').forEach(spot => {
+        spot.addEventListener('click', () => {
+          const room = spot.getAttribute('data-room-name') || 'Hotspot';
+          showToast(`Inspecting: ${room}`);
+        });
+      });
+    }
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  tabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = btn.getAttribute('data-layout');
+      renderLayout(key);
     });
   });
+
+  cardSwitchBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = btn.getAttribute('data-layout');
+      renderLayout(key);
+      const viewer = document.getElementById('layout-showcase-viewer');
+      if (viewer) viewer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  });
+
+  if (modeBlueprintBtn && modeGroundBtn) {
+    modeBlueprintBtn.addEventListener('click', () => {
+      currentLayoutMode = 'blueprint';
+      modeBlueprintBtn.classList.add('active');
+      modeGroundBtn.classList.remove('active');
+      const data = PROJECT_LAYOUTS_DATA[currentLayoutKey];
+      if (data && layoutImg) layoutImg.src = data.blueprintImg;
+    });
+
+    modeGroundBtn.addEventListener('click', () => {
+      currentLayoutMode = 'ground';
+      modeGroundBtn.classList.add('active');
+      modeBlueprintBtn.classList.remove('active');
+      const data = PROJECT_LAYOUTS_DATA[currentLayoutKey];
+      if (data && layoutImg) layoutImg.src = data.groundImg;
+    });
+  }
+
+  if (modalTriggerBtn) {
+    modalTriggerBtn.addEventListener('click', () => {
+      openLayoutModal(currentLayoutKey);
+    });
+  }
+
+  document.querySelectorAll('.open-layout-modal-direct').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = btn.getAttribute('data-layout') || 'grand-empire';
+      openLayoutModal(key);
+    });
+  });
+
+  if (container && layoutImg) {
+    let isDown = false;
+    let startX;
+    let currentPos = 50;
+
+    container.addEventListener('mousedown', (e) => {
+      isDown = true;
+      startX = e.pageX - container.offsetLeft;
+      container.style.cursor = 'grabbing';
+    });
+
+    window.addEventListener('mouseup', () => {
+      isDown = false;
+      container.style.cursor = 'grab';
+    });
+
+    container.addEventListener('mousemove', (e) => {
+      if (!isDown) return;
+      e.preventDefault();
+      const x = e.pageX - container.offsetLeft;
+      const walk = (x - startX) * 0.08;
+      currentPos = Math.max(0, Math.min(100, currentPos - walk));
+      layoutImg.style.objectPosition = `${currentPos}% center`;
+      startX = x;
+    });
+  }
+
+  renderLayout('grand-empire');
+}
+
+function openLayoutModal(key) {
+  const tourModal = document.getElementById('virtual-tour-modal');
+  if (!tourModal) return;
+  updateModalLayout(key);
+  tourModal.classList.add('active');
+}
+
+function updateModalLayout(key) {
+  const data = PROJECT_LAYOUTS_DATA[key];
+  if (!data) return;
+
+  const modalImg = document.getElementById('modal-layout-img');
+  const modalBadge = document.getElementById('modal-layout-badge');
+  const modalTitle = document.getElementById('tour-modal-title');
+  const modalSubtitle = document.getElementById('modal-layout-subtitle');
+  const modalTagsRow = document.getElementById('modal-layout-tags-row');
+  const modalBookBtn = document.getElementById('modal-layout-book-btn');
+  const modalTabs = document.querySelectorAll('.modal-layout-tab-btn');
+
+  modalTabs.forEach(t => {
+    const isAct = t.getAttribute('data-layout') === key;
+    t.classList.toggle('active', isAct);
+    t.style.background = isAct ? 'var(--gold-gradient)' : 'transparent';
+    t.style.color = isAct ? '#080b11' : '#cbd5e1';
+    t.style.fontWeight = isAct ? '700' : '600';
+  });
+
+  if (modalImg) modalImg.src = data.blueprintImg;
+  if (modalBadge) modalBadge.textContent = data.badge;
+  if (modalTitle) modalTitle.innerHTML = `${data.name.replace('Layout Plan', '')} <span class="gold-gradient-text">Layout Blueprint</span>`;
+  if (modalSubtitle) modalSubtitle.textContent = `● ${data.loc}`;
+  if (modalBookBtn) modalBookBtn.setAttribute('data-prop-name', `${data.name} Inquiries`);
+
+  if (modalTagsRow && data.tags) {
+    modalTagsRow.innerHTML = data.tags.map(tag => `
+      <button class="btn btn-secondary btn-sm" onclick="showToast('${tag}')">${tag}</button>
+    `).join('');
+  }
 }
 
 /* ==========================================================================
@@ -425,11 +758,20 @@ function initModals() {
     });
   });
 
-  // Trigger 360 Tour Modal
+  // Trigger 360 Tour / Layout Blueprint Modal
   document.querySelectorAll('.property-tour-360-btn, .hero-explore-tour-btn').forEach((btn) => {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
-      if (tourModal) tourModal.classList.add('active');
+      const layoutKey = btn.getAttribute('data-layout') || currentLayoutKey || 'grand-empire';
+      openLayoutModal(layoutKey);
+    });
+  });
+
+  // Modal Layout Tab Switcher Listeners
+  document.querySelectorAll('.modal-layout-tab-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const key = btn.getAttribute('data-layout');
+      updateModalLayout(key);
     });
   });
 
