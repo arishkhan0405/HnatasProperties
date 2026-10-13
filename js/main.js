@@ -501,7 +501,7 @@ const PROJECT_LAYOUTS_DATA = {
     loc: 'Manikandam, Trichy-Madurai NH — Adjacent to Panjapur Integrated New Bus Terminal',
     badge: 'DTCP NO: 109/2026 • 21 ACRES • 395 PLOTS',
     blueprintImg: 'Images/WhatsApp Image 2026-09-27 at 8.09.23 AM (2).jpeg',
-    groundImg: 'Images/WhatsApp Image 2026-09-27 at 8.11.08 AM (1).jpeg',
+    groundImg: 'Images/grand-empire-amenities.jpg',
     propName: 'Grand Empire Master Layout Consultation',
     tags: ['Cholan Salai: 33ft Main Avenue', 'Pandiyan Salai: Commercial Link', 'Cheran Salai: Residential Boulevard', 'Magizh Mutram & Sparta Park Zone'],
     hotspots: [
@@ -512,48 +512,48 @@ const PROJECT_LAYOUTS_DATA = {
     ]
   },
   'akshayam': {
-    name: 'Akshayam Premier Villa Plots Layout',
-    loc: 'Manikandam, Trichy — DTCP 131/2026 Approved Villa Community',
-    badge: 'DTCP NO: 131/2026 APPROVED • PREMIER VILLA PLOTS',
-    blueprintImg: 'Images/akshayam.jpg',
-    groundImg: 'Images/WhatsApp Image 2026-09-27 at 8.10.11 AM (1).jpeg',
-    propName: 'Akshayam Villa Plots Layout Consultation',
-    tags: ['DTCP 131/2026 Approved', '33ft Wide Blacktop Roads', 'Ready for Villa Construction', 'Panjapur Terminal Proximity'],
+    name: 'Akshayam 63-Plot Master Layout Plan',
+    loc: 'Manikandam, Trichy — DTCP 131/2026 Approved Villa Community near Panjapur',
+    badge: 'DTCP NO: 131/2026 APPROVED • 63 APPROVED PLOTS • 33FT ROADS',
+    blueprintImg: 'Images/akshayam-layout.jpg',
+    groundImg: 'Images/akshayam-amenities.jpg',
+    propName: 'Akshayam 63 Plots Layout Consultation',
+    tags: ['DTCP 131/2026 Approved', '63 Approved Plots', '33ft & 30ft Roads', 'Commercial & Gold Corner Plots', 'Dedicated Park Zone'],
     hotspots: [
-      { top: '38%', left: '42%', title: 'DTCP Approved 131/2026', desc: 'Legally vetted, DTCP & RERA approved demarcated villa plots with clear title deeds.' },
-      { top: '50%', left: '68%', title: '33ft Wide Blacktop Roads', desc: 'Smooth, durable internal roads designed for seamless vehicular access and luxury living.' },
-      { top: '30%', left: '78%', title: 'Ready for Construction', desc: 'Leveled fertile red soil ready for immediate luxury villa building with sweet potable groundwater.' },
-      { top: '60%', left: '28%', title: 'High Growth Corridor', desc: 'Just minutes from Panjapur Integrated Bus Terminal with phenomenal ROI appreciation.' }
+      { top: '22%', left: '35%', title: 'Commercial Frontage Plots', desc: 'Plots 3 to 6 along prime 30ft road with broad frontage, ideal for commercial or mixed-use development.' },
+      { top: '48%', left: '58%', title: '33ft Main Wide Road', desc: 'Spacious 33ft broad blacktop thar road running along the layout with street lights and avenue trees.' },
+      { top: '75%', left: '26%', title: 'Community Park Area', desc: 'Dedicated layout park for children recreation, greenery, and healthy open-air living.' },
+      { top: '56%', left: '52%', title: 'Gold Corner Plots', desc: 'Prime corner plots (Plots 7, 20, 21, 36, 47) with dual road access and premium Vastu orientation.' }
     ]
   },
   'kings-avenue': {
-    name: 'Kings Avenue 33ft Thar Road Layout',
-    loc: 'Trichy - Madurai Highway Frontage — Premier Gated Community',
-    badge: '33FT THAR ROADS • GATED TOWNSHIP • DTCP & RERA',
-    blueprintImg: 'Images/kings-avenue.jpg',
-    groundImg: 'Images/WhatsApp Image 2026-09-27 at 8.10.04 AM.jpeg',
-    propName: 'Kings Avenue 33ft Thar Road Layout Consultation',
-    tags: ['33ft Heavy-Duty Blacktop Thar Roads', 'Full Gated Perimeter Compound Wall', 'Grand Architectural Entrance Arch', 'Direct Trichy-Madurai NH Access'],
+    name: 'Kings Avenue-II 28-Plot Master Layout',
+    loc: 'Trichy - Madurai Highway Frontage — DTCP 124/2025 Approved Gated Layout',
+    badge: 'DTCP NO: 124/2025 • RERA APPROVED • 28 PLOTS • 33FT THAR ROADS',
+    blueprintImg: 'Images/kings-avenue-layout.jpg',
+    groundImg: 'Images/kings-avenue.jpg',
+    propName: 'Kings Avenue-II 28 Plots Layout Consultation',
+    tags: ['DTCP 124/2025 Approved', '28 Premium Plots', '33ft Direct NH Road', 'Dedicated Park Zone', 'Premium Corner Plots'],
     hotspots: [
-      { top: '48%', left: '50%', title: '33ft Heavy-Duty Blacktop Road', desc: 'Engineered heavy-duty blacktop thar roads with reinforced concrete curb stones.' },
-      { top: '35%', left: '82%', title: 'Gated Perimeter Compound Wall', desc: 'Fully enclosed high-security precast compound wall surrounding the entire community.' },
-      { top: '28%', left: '25%', title: 'Trichy-Madurai NH Frontage', desc: 'Direct fast accessibility to Trichy International Airport, Madurai NH, and city center.' },
-      { top: '65%', left: '60%', title: 'Clear Individual Titles', desc: 'Bank loan approved with instant registration readiness and individual Patta transfer.' }
+      { top: '40%', left: '88%', title: 'Direct Trichy-Madurai NH Road', desc: 'Direct 33ft wide roadway link directly connecting to Trichy - Madurai National Highway.' },
+      { top: '45%', left: '48%', title: '33ft Wide Central Avenue', desc: 'Central heavy-duty 33ft wide blacktop thar road with concrete curb stones and avenue lighting.' },
+      { top: '40%', left: '18%', title: 'Dedicated Community Park', desc: 'Lush green landscaped park zone dedicated for community recreation and children play area.' },
+      { top: '32%', left: '60%', title: 'Premium Corner Plots', desc: 'Plots 1, 2, 5, 6, 12, 19, 28 with dual-road corner access and 100% Vastu compliance.' }
     ]
   },
   'crystal': {
-    name: 'Crystal Residential Community Layout',
-    loc: 'Nagamangalam, Trichy — 9.5 KM from Panjapur New Bus Terminal',
-    badge: 'SPECIAL OFFER ₹850/SQ.FT • FREE REGISTRATION + PATTA',
-    blueprintImg: 'Images/crystal.jpg',
-    groundImg: 'Images/crystal.jpg',
-    propName: 'Crystal Layout Consultation & ₹850 Offer Booking',
-    tags: ['Special Offer ₹850/Sq.Ft', '100% Free Registration + Free Patta', '9.5 KM from Panjapur Bus Terminal', 'Near SFS & Chellammal Schools'],
+    name: 'Green Valley’s Crystal 147-Plot Master Layout',
+    loc: 'Nagamangalam, Trichy — DTCP 42/2026 Approved Community (Near Panjapur Bus Terminal)',
+    badge: 'DTCP NO: 42/2026 • RERA APPROVED • 147 PLOTS • ₹850/SQ.FT',
+    blueprintImg: 'Images/crystal-layout.jpg',
+    groundImg: 'Images/crystal-entrance.jpg',
+    propName: 'Crystal 147 Plots Layout Consultation & ₹850 Offer Booking',
+    tags: ['DTCP 42/2026 Approved', '147 Approved Plots', 'Special Offer ₹850/Sq.Ft', '33ft & 30ft Thar Roads', '7ft Compound Wall', 'Dedicated Park & EB Lights'],
     hotspots: [
-      { top: '45%', left: '20%', title: 'Special Offer ₹850/- Per Sq.Ft', desc: 'Unbeatable value pricing in Trichy’s fastest growing residential zone.' },
-      { top: '38%', left: '65%', title: '100% FREE Registration & Patta', desc: 'Zero extra registration costs — complete legal registration & Patta included free.' },
-      { top: '55%', left: '45%', title: 'Educational & Medical Hub', desc: 'Close proximity to SFS Matriculation, Chellammal schools, and Harshamithra Hospital.' },
-      { top: '25%', left: '80%', title: 'Strategic Nagamangalam Link', desc: 'Only 3.5 KM from Trichy - Madurai NH and 9.5 KM from Panjapur New Bus Stand.' }
+      { top: '20%', left: '25%', title: '30ft Thar Road & Plots 1-42', desc: 'Spacious residential plots with 30ft wide heavy-duty blacktop thar roads and clear boundary demarcations.' },
+      { top: '48%', left: '38%', title: 'DTCP 42/2026 & RERA Approved', desc: 'Legally vetted 147 plots with DTCP Approved 42/2026, 7ft gated perimeter compound wall, and instant bank loan facility.' },
+      { top: '85%', left: '18%', title: 'Landscaped Community Park', desc: 'Dedicated layout park for family recreation, children play area, and lush green open space.' },
+      { top: '72%', left: '32%', title: '33ft Main Avenue & EB Lights', desc: 'Broad 33ft wide blacktop avenue with EB power lines, avenue trees, and modern street lights.' }
     ]
   }
 };
@@ -588,6 +588,13 @@ function init360Showcase() {
       layoutImg.style.opacity = '0.3';
       setTimeout(() => {
         layoutImg.src = currentLayoutMode === 'blueprint' ? data.blueprintImg : data.groundImg;
+        if (currentLayoutMode === 'blueprint') {
+          layoutImg.style.objectFit = 'contain';
+          layoutImg.style.backgroundColor = '#0b0f19';
+        } else {
+          layoutImg.style.objectFit = 'cover';
+          layoutImg.style.backgroundColor = 'transparent';
+        }
         layoutImg.style.opacity = '1';
       }, 180);
     }
@@ -643,7 +650,11 @@ function init360Showcase() {
       modeBlueprintBtn.classList.add('active');
       modeGroundBtn.classList.remove('active');
       const data = PROJECT_LAYOUTS_DATA[currentLayoutKey];
-      if (data && layoutImg) layoutImg.src = data.blueprintImg;
+      if (data && layoutImg) {
+        layoutImg.src = data.blueprintImg;
+        layoutImg.style.objectFit = 'contain';
+        layoutImg.style.backgroundColor = '#0b0f19';
+      }
     });
 
     modeGroundBtn.addEventListener('click', () => {
@@ -651,7 +662,11 @@ function init360Showcase() {
       modeGroundBtn.classList.add('active');
       modeBlueprintBtn.classList.remove('active');
       const data = PROJECT_LAYOUTS_DATA[currentLayoutKey];
-      if (data && layoutImg) layoutImg.src = data.groundImg;
+      if (data && layoutImg) {
+        layoutImg.src = data.groundImg;
+        layoutImg.style.objectFit = 'cover';
+        layoutImg.style.backgroundColor = 'transparent';
+      }
     });
   }
 
