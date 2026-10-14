@@ -50,6 +50,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 16. About Project Interactive Multi-Project Slideshow Engine
   initAboutProjectSlideshow();
+
+  // 17. Ensure Site Walkthrough Videos are Muted (Disabled Sound)
+  document.querySelectorAll('video').forEach(video => {
+    video.muted = true;
+    video.defaultMuted = true;
+  });
 });
 
 /* ==========================================================================
