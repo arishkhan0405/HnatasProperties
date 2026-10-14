@@ -1,5 +1,5 @@
 /* ==========================================================================
-   MM PROPERTIES - MASTER CLIENT INTERACTIVITY & UI CONTROLLER
+   HANTASPROPERTIES - MASTER CLIENT INTERACTIVITY & UI CONTROLLER
    ========================================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -56,19 +56,28 @@ document.addEventListener('DOMContentLoaded', () => {
    0. HERO ESTATE BACKGROUND SWITCHER & DYNAMIC PROJECT CONTENT
    ========================================================================== */
 const HERO_PROJECTS_DATA = {
+  'hantasproperties': {
+    bg: 'Images/Hero page.png',
+    badge: 'PREMIER REAL ESTATE DEVELOPER • TRICHY',
+    title: `<span class="gold-gradient-text">HANTASPROPERTIES</span>`,
+    subtitle: `<span style="display: block; font-size: 1.35rem; font-weight: 800; color: #926207; margin-bottom: 0.6rem; font-family: var(--font-heading-cinzel); letter-spacing: 0.02em;">Your Future Begins with the Right Property.</span>Discover four exclusive property projects in Trichy — Grand Empire, Akshayam, Kings Avenue &amp; Crystal.`,
+    offer: '',
+    propName: 'HantasProperties General Inquiry',
+    metrics: []
+  },
   'mrproperties': {
     bg: 'Images/Hero page.png',
     badge: 'PREMIER REAL ESTATE DEVELOPER • TRICHY',
-    title: `<span class="gold-gradient-text">MRPROPERTIES</span>`,
+    title: `<span class="gold-gradient-text">HANTASPROPERTIES</span>`,
     subtitle: `<span style="display: block; font-size: 1.35rem; font-weight: 800; color: #926207; margin-bottom: 0.6rem; font-family: var(--font-heading-cinzel); letter-spacing: 0.02em;">Your Future Begins with the Right Property.</span>Discover four exclusive property projects in Trichy — Grand Empire, Akshayam, Kings Avenue &amp; Crystal.`,
     offer: '',
-    propName: 'MRproperties General Inquiry',
+    propName: 'HantasProperties General Inquiry',
     metrics: []
   },
   'grand-empire': {
     bg: 'Images/grand-empire-2.jpg',
     badge: 'DTCP APPROVED NO: 109/2026 • RERA APPROVED • TRICHY - MADURAI NH',
-    title: `MRpropertys' <br><span class="gold-gradient-text">GRAND EMPIRE</span>`,
+    title: `HantasProperties' <br><span class="gold-gradient-text">GRAND EMPIRE</span>`,
     subtitle: `Royal Land for Royal People! Premier 21-Acre Gated Lifestyle Layout with 395 Approved Plots @ Manikandam, Trichy. Adjacent to Panjapur Integrated New Bus Terminal with 16 Live Night-Vision CCTV App, Magizh Mutram &amp; 100% Bank Loan Facility.`,
     offer: `<i data-lucide="award" style="width: 15px; height: 15px; color: var(--gold-primary);"></i> <span>Grand Empire: <strong>395 Approved Plots</strong> • <strong>21-Acre Gated Township</strong></span>`,
     propName: 'Grand Empire Site Visit Request',
@@ -82,7 +91,7 @@ const HERO_PROJECTS_DATA = {
   'akshayam': {
     bg: 'Images/akshayam.jpg',
     badge: 'பஞ்சப்பூர் அருகே • DTCP APPROVED 131/2026 • RERA APPROVED',
-    title: `MRpropertys' <br><span class="gold-gradient-text">AKSHAYAM</span>`,
+    title: `HantasProperties' <br><span class="gold-gradient-text">AKSHAYAM</span>`,
     subtitle: `அக்ஷயம் செழிப்பாக்கும்! Premier Villa Plots @ Manikandam, Trichy. DTCP Approved (No: 131/2026) &amp; RERA Approved layout with top luxury amenities, ready for immediate construction &amp; massive value appreciation.`,
     offer: `<i data-lucide="star" style="width: 15px; height: 15px; color: var(--gold-primary);"></i> <span>Akshayam: <strong>DTCP Appr. 131/2026</strong> • <strong>Premium Villa Plots</strong></span>`,
     propName: 'Akshayam Site Visit Request',
@@ -96,7 +105,7 @@ const HERO_PROJECTS_DATA = {
   'kings-avenue': {
     bg: 'Images/kings-avenue.jpg',
     badge: 'DTCP &amp; RERA APPROVED • 33FT THAR ROADS • TRICHY',
-    title: `MRpropertys' <br><span class="gold-gradient-text">KINGS AVENUE</span>`,
+    title: `HantasProperties' <br><span class="gold-gradient-text">KINGS AVENUE</span>`,
     subtitle: `Exclusive residential community with 33ft wide blacktop thar roads, grand entrance arch, secure compound walls, clear titles, and supreme connectivity on Trichy - Madurai Highway.`,
     offer: `<i data-lucide="crown" style="width: 15px; height: 15px; color: var(--gold-primary);"></i> <span>Kings Avenue: <strong>33ft Wide Blacktop Roads</strong> • <strong>Gated Layout</strong></span>`,
     propName: 'Kings Avenue Site Visit Request',
@@ -110,7 +119,7 @@ const HERO_PROJECTS_DATA = {
   'crystal': {
     bg: 'Images/crystal.jpg',
     badge: 'பஞ்சப்பூர் அருகே • DTCP &amp; RERA APPROVED PLOTS • NAGAMANGALAM, TRICHY',
-    title: `MRpropertys' <br><span class="gold-gradient-text">CRYSTAL</span>`,
+    title: `HantasProperties' <br><span class="gold-gradient-text">CRYSTAL</span>`,
     subtitle: `பஞ்சப்பூர் அருகே DTCP &amp; RERA Approved Plots @ Nagamangalam, Trichy. Just 9.5 KM from Panjapur New Bus Terminal &amp; 3.5 KM from Trichy - Madurai NH. Nearby SFS Matriculation, Chellammal &amp; State Board Schools, Harshamithra Hospital.`,
     offer: `<i data-lucide="sparkles" style="width: 15px; height: 15px; color: var(--gold-primary);"></i> <span>Special Offer: <strong>₹850/- Per Sq.Ft</strong> • <strong>Registration + Patta FREE!</strong></span>`,
     propName: 'Crystal Site Visit Request',
@@ -949,7 +958,7 @@ function initFormHandlers() {
   if (newsletterForm) {
     newsletterForm.addEventListener('submit', (e) => {
       e.preventDefault();
-      showToast('Subscribed to MRpropertys Private Layout Updates.');
+      showToast('Subscribed to HantasProperties Private Layout Updates.');
       newsletterForm.reset();
     });
   }

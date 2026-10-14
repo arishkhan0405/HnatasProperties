@@ -1,5 +1,5 @@
 /* ==========================================================================
-   MM PROPERTIES - LUXURY REAL ESTATE DESIGN SYSTEM & STYLESHEET
+   HANTASPROPERTIES - LUXURY REAL ESTATE DESIGN SYSTEM & STYLESHEET
    Aesthetics: Deep Obsidian, Champagne Gold, Frost Glassmorphism, 3D Elevation
    ========================================================================== */
 
@@ -519,8 +519,8 @@ img {
   align-items: center;
   justify-content: center;
   background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
-  padding: 6px 14px;
-  border-radius: 14px;
+  padding: 4px 8px;
+  border-radius: 12px;
   border: 2px solid #d4af37;
   box-shadow: 
     0 10px 25px rgba(0, 0, 0, 0.18),
