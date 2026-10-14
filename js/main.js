@@ -781,9 +781,21 @@ function initModals() {
   document.querySelectorAll('.open-booking-modal-btn').forEach((btn) => {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
-      const propTitle = btn.getAttribute('data-prop-name') || 'Signature Collection';
-      const propInput = document.getElementById('modal-booking-prop-name');
-      if (propInput) propInput.value = propTitle;
+      const propTitle = btn.getAttribute('data-prop-name') || '';
+      const propSelect = document.getElementById('modal-booking-prop-name');
+      if (propSelect) {
+        if (propTitle.includes('Grand Empire')) {
+          propSelect.value = 'Grand Empire Project';
+        } else if (propTitle.includes('Akshayam')) {
+          propSelect.value = 'Akshayam Project';
+        } else if (propTitle.includes('Kings Avenue')) {
+          propSelect.value = 'Kings Avenue Project';
+        } else if (propTitle.includes('Crystal')) {
+          propSelect.value = 'Crystal Project';
+        } else {
+          propSelect.value = 'General Plot Booking Inquiry';
+        }
+      }
       if (bookingModal) bookingModal.classList.add('active');
     });
   });
