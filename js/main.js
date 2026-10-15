@@ -81,7 +81,7 @@ const HERO_PROJECTS_DATA = {
     metrics: []
   },
   'grand-empire': {
-    bg: 'Images/grand-empire-2.jpg',
+    bg: 'Images/grand-empire-arch.jpg',
     badge: 'DTCP APPROVED NO: 109/2026 • RERA APPROVED • TRICHY - MADURAI NH',
     title: `HantasProperties' <br><span class="gold-gradient-text">GRAND EMPIRE</span>`,
     subtitle: `Royal Land for Royal People! Premier 21-Acre Gated Lifestyle Layout with 395 Approved Plots @ Manikandam, Trichy. Adjacent to Panjapur Integrated New Bus Terminal with 16 Live Night-Vision CCTV App, Magizh Mutram &amp; 100% Bank Loan Facility.`,
@@ -95,7 +95,7 @@ const HERO_PROJECTS_DATA = {
     ]
   },
   'akshayam': {
-    bg: 'Images/akshayam.jpg',
+    bg: 'Images/akshayam-arch.jpg',
     badge: 'பஞ்சப்பூர் அருகே • DTCP APPROVED 131/2026 • RERA APPROVED',
     title: `HantasProperties' <br><span class="gold-gradient-text">AKSHAYAM</span>`,
     subtitle: `அக்ஷயம் செழிப்பாக்கும்! Premier Villa Plots @ Manikandam, Trichy. DTCP Approved (No: 131/2026) &amp; RERA Approved layout with top luxury amenities, ready for immediate construction &amp; massive value appreciation.`,
@@ -109,7 +109,7 @@ const HERO_PROJECTS_DATA = {
     ]
   },
   'kings-avenue': {
-    bg: 'Images/kings-avenue.jpg',
+    bg: 'Images/kings-avenue-arch.png',
     badge: 'DTCP &amp; RERA APPROVED • 33FT THAR ROADS • TRICHY',
     title: `HantasProperties' <br><span class="gold-gradient-text">KINGS AVENUE</span>`,
     subtitle: `Exclusive residential community with 33ft wide blacktop thar roads, grand entrance arch, secure compound walls, clear titles, and supreme connectivity on Trichy - Madurai Highway.`,
@@ -123,7 +123,7 @@ const HERO_PROJECTS_DATA = {
     ]
   },
   'crystal': {
-    bg: 'Images/crystal.jpg',
+    bg: 'Images/crystal-arch.jpg',
     badge: 'பஞ்சப்பூர் அருகே • DTCP &amp; RERA APPROVED PLOTS • NAGAMANGALAM, TRICHY',
     title: `HantasProperties' <br><span class="gold-gradient-text">CRYSTAL</span>`,
     subtitle: `பஞ்சப்பூர் அருகே DTCP &amp; RERA Approved Plots @ Nagamangalam, Trichy. Just 9.5 KM from Panjapur New Bus Terminal &amp; 3.5 KM from Trichy - Madurai NH. Nearby SFS Matriculation, Chellammal &amp; State Board Schools, Harshamithra Hospital.`,
@@ -150,78 +150,112 @@ function initHeroEstateSwitcher() {
 
   if (!switcherBtns.length || !heroBgImg) return;
 
-  switcherBtns.forEach((btn) => {
+  let currentHeroIdx = 0;
+  let heroAutoPlayTimer = null;
+  const AUTOPLAY_DELAY_MS = 10000; // 10 seconds per hero slide
+
+  function activateHeroProject(index, isUserInteraction = false) {
+    if (index >= switcherBtns.length) index = 0;
+    if (index < 0) index = switcherBtns.length - 1;
+    currentHeroIdx = index;
+
+    const btn = switcherBtns[currentHeroIdx];
+    if (!btn) return;
+
+    switcherBtns.forEach((b) => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    const projectKey = btn.getAttribute('data-project');
+    const projectData = HERO_PROJECTS_DATA[projectKey];
+
+    const newBg = projectData ? projectData.bg : btn.getAttribute('data-bg');
+    const title = btn.getAttribute('data-title') || (projectData ? projectData.title : '');
+
+    if (newBg) {
+      heroBgImg.style.opacity = '0.2';
+      heroBgImg.style.transform = 'scale(1.15)';
+      setTimeout(() => {
+        heroBgImg.src = newBg;
+        heroBgImg.style.opacity = '1';
+        heroBgImg.style.transform = 'scale(1.05)';
+      }, 220);
+    }
+
+    if (projectData) {
+      if (heroBadge) {
+        heroBadge.innerHTML = `<span class="pill-dot"></span><span>${projectData.badge}</span>`;
+      }
+      if (heroTitle) {
+        heroTitle.innerHTML = projectData.title;
+      }
+      if (heroSubtitle) {
+        heroSubtitle.innerHTML = projectData.subtitle;
+      }
+      if (heroOffer) {
+        if (projectData.offer) {
+          heroOffer.innerHTML = projectData.offer;
+          heroOffer.style.display = 'inline-flex';
+        } else {
+          heroOffer.innerHTML = '';
+          heroOffer.style.display = 'none';
+        }
+      }
+      if (heroBookBtn) {
+        heroBookBtn.setAttribute('data-prop-name', projectData.propName);
+      }
+      if (heroMetrics) {
+        if (projectData.metrics && projectData.metrics.length > 0) {
+          heroMetrics.style.display = 'grid';
+          heroMetrics.innerHTML = projectData.metrics.map(m => `
+            <div class="metric-card">
+              <div class="metric-number" ${m.highlight ? `style="color: ${m.highlight};"` : ''}>${m.number}</div>
+              <div class="metric-label">${m.label}</div>
+            </div>
+          `).join('');
+        } else {
+          heroMetrics.innerHTML = '';
+          heroMetrics.style.display = 'none';
+        }
+      }
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    }
+
+    // Only show manual click toast if user interacted
+    if (isUserInteraction && title) {
+      showToast(`Featured Project: ${title.replace(/<[^>]*>?/gm, '')}`);
+    }
+
+    // Synchronize About Project Slideshow with selected Hero project
+    if (typeof window.switchAboutProject === 'function') {
+      window.switchAboutProject(projectKey);
+    }
+  }
+
+  function startAutoPlay() {
+    stopAutoPlay();
+    heroAutoPlayTimer = setInterval(() => {
+      activateHeroProject((currentHeroIdx + 1) % switcherBtns.length, false);
+    }, AUTOPLAY_DELAY_MS);
+  }
+
+  function stopAutoPlay() {
+    if (heroAutoPlayTimer) {
+      clearInterval(heroAutoPlayTimer);
+      heroAutoPlayTimer = null;
+    }
+  }
+
+  switcherBtns.forEach((btn, idx) => {
     btn.addEventListener('click', () => {
-      switcherBtns.forEach((b) => b.classList.remove('active'));
-      btn.classList.add('active');
-
-      const projectKey = btn.getAttribute('data-project');
-      const projectData = HERO_PROJECTS_DATA[projectKey];
-
-      const newBg = projectData ? projectData.bg : btn.getAttribute('data-bg');
-      const title = btn.getAttribute('data-title') || (projectData ? projectData.title : '');
-
-      if (newBg) {
-        heroBgImg.style.opacity = '0.2';
-        heroBgImg.style.transform = 'scale(1.15)';
-        setTimeout(() => {
-          heroBgImg.src = newBg;
-          heroBgImg.style.opacity = '1';
-          heroBgImg.style.transform = 'scale(1.05)';
-        }, 220);
-      }
-
-      if (projectData) {
-        if (heroBadge) {
-          heroBadge.innerHTML = `<span class="pill-dot"></span><span>${projectData.badge}</span>`;
-        }
-        if (heroTitle) {
-          heroTitle.innerHTML = projectData.title;
-        }
-        if (heroSubtitle) {
-          heroSubtitle.innerHTML = projectData.subtitle;
-        }
-        if (heroOffer) {
-          if (projectData.offer) {
-            heroOffer.innerHTML = projectData.offer;
-            heroOffer.style.display = 'inline-flex';
-          } else {
-            heroOffer.innerHTML = '';
-            heroOffer.style.display = 'none';
-          }
-        }
-        if (heroBookBtn) {
-          heroBookBtn.setAttribute('data-prop-name', projectData.propName);
-        }
-        if (heroMetrics) {
-          if (projectData.metrics && projectData.metrics.length > 0) {
-            heroMetrics.style.display = 'grid';
-            heroMetrics.innerHTML = projectData.metrics.map(m => `
-              <div class="metric-card">
-                <div class="metric-number" ${m.highlight ? `style="color: ${m.highlight};"` : ''}>${m.number}</div>
-                <div class="metric-label">${m.label}</div>
-              </div>
-            `).join('');
-          } else {
-            heroMetrics.innerHTML = '';
-            heroMetrics.style.display = 'none';
-          }
-        }
-        if (typeof lucide !== 'undefined') {
-          lucide.createIcons();
-        }
-      }
-
-      if (title) {
-        showToast(`Featured Project: ${title.replace(/<[^>]*>?/gm, '')}`);
-      }
-
-      // Synchronize About Project Slideshow with selected Hero project
-      if (typeof window.switchAboutProject === 'function') {
-        window.switchAboutProject(projectKey);
-      }
+      activateHeroProject(idx, true);
+      startAutoPlay();
     });
   });
+
+  // Start automatic rotation every 10 seconds
+  startAutoPlay();
 }
 
 /* ==========================================================================
@@ -515,8 +549,8 @@ const PROJECT_LAYOUTS_DATA = {
     name: 'Grand Empire 21-Acre Layout Plan',
     loc: 'Manikandam, Trichy-Madurai NH — Adjacent to Panjapur Integrated New Bus Terminal',
     badge: 'DTCP NO: 109/2026 • 21 ACRES • 395 PLOTS',
-    blueprintImg: 'Images/WhatsApp Image 2026-09-27 at 8.09.23 AM (2).jpeg',
-    groundImg: 'Images/grand-empire-amenities.jpg',
+    blueprintImg: 'Images/grand-empire-layout.jpg',
+    groundImg: 'Images/grand-empire-arch.jpg',
     propName: 'Grand Empire Master Layout Consultation',
     tags: ['Cholan Salai: 33ft Main Avenue', 'Pandiyan Salai: Commercial Link', 'Cheran Salai: Residential Boulevard', 'Magizh Mutram & Sparta Park Zone'],
     hotspots: [
@@ -531,7 +565,7 @@ const PROJECT_LAYOUTS_DATA = {
     loc: 'Manikandam, Trichy — DTCP 131/2026 Approved Villa Community near Panjapur',
     badge: 'DTCP NO: 131/2026 APPROVED • 63 APPROVED PLOTS • 33FT ROADS',
     blueprintImg: 'Images/akshayam-layout.jpg',
-    groundImg: 'Images/akshayam-amenities.jpg',
+    groundImg: 'Images/akshayam-arch.jpg',
     propName: 'Akshayam 63 Plots Layout Consultation',
     tags: ['DTCP 131/2026 Approved', '63 Approved Plots', '33ft & 30ft Roads', 'Commercial & Gold Corner Plots', 'Dedicated Park Zone'],
     hotspots: [
@@ -546,7 +580,7 @@ const PROJECT_LAYOUTS_DATA = {
     loc: 'Trichy - Madurai Highway Frontage — DTCP 124/2025 Approved Gated Layout',
     badge: 'DTCP NO: 124/2025 • RERA APPROVED • 28 PLOTS • 33FT THAR ROADS',
     blueprintImg: 'Images/kings-avenue-layout.jpg',
-    groundImg: 'Images/kings-avenue.jpg',
+    groundImg: 'Images/kings-avenue-arch.png',
     propName: 'Kings Avenue-II 28 Plots Layout Consultation',
     tags: ['DTCP 124/2025 Approved', '28 Premium Plots', '33ft Direct NH Road', 'Dedicated Park Zone', 'Premium Corner Plots'],
     hotspots: [
@@ -561,7 +595,7 @@ const PROJECT_LAYOUTS_DATA = {
     loc: 'Nagamangalam, Trichy — DTCP 42/2026 Approved Community (Near Panjapur Bus Terminal)',
     badge: 'DTCP NO: 42/2026 • RERA APPROVED • 147 PLOTS • ₹850/SQ.FT',
     blueprintImg: 'Images/crystal-layout.jpg',
-    groundImg: 'Images/crystal-entrance.jpg',
+    groundImg: 'Images/crystal-arch.jpg',
     propName: 'Crystal 147 Plots Layout Consultation & ₹850 Offer Booking',
     tags: ['DTCP 42/2026 Approved', '147 Approved Plots', 'Special Offer ₹850/Sq.Ft', '33ft & 30ft Thar Roads', '7ft Compound Wall', 'Dedicated Park & EB Lights'],
     hotspots: [
@@ -602,14 +636,9 @@ function init360Showcase() {
     if (layoutImg) {
       layoutImg.style.opacity = '0.3';
       setTimeout(() => {
-        layoutImg.src = currentLayoutMode === 'blueprint' ? data.blueprintImg : data.groundImg;
-        if (currentLayoutMode === 'blueprint') {
-          layoutImg.style.objectFit = 'contain';
-          layoutImg.style.backgroundColor = '#0b0f19';
-        } else {
-          layoutImg.style.objectFit = 'cover';
-          layoutImg.style.backgroundColor = 'transparent';
-        }
+        layoutImg.src = data.blueprintImg;
+        layoutImg.style.objectFit = 'contain';
+        layoutImg.style.backgroundColor = '#0b0f19';
         layoutImg.style.opacity = '1';
       }, 180);
     }
@@ -659,35 +688,14 @@ function init360Showcase() {
     });
   });
 
-  if (modeBlueprintBtn && modeGroundBtn) {
-    modeBlueprintBtn.addEventListener('click', () => {
-      currentLayoutMode = 'blueprint';
-      modeBlueprintBtn.classList.add('active');
-      modeGroundBtn.classList.remove('active');
+  if (inquiryBtn) {
+    inquiryBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       const data = PROJECT_LAYOUTS_DATA[currentLayoutKey];
-      if (data && layoutImg) {
-        layoutImg.src = data.blueprintImg;
-        layoutImg.style.objectFit = 'contain';
-        layoutImg.style.backgroundColor = '#0b0f19';
+      if (data && data.blueprintImg) {
+        downloadLayoutFile(data.blueprintImg, `${currentLayoutKey}-layout-blueprint.jpg`, data.name);
       }
-    });
-
-    modeGroundBtn.addEventListener('click', () => {
-      currentLayoutMode = 'ground';
-      modeGroundBtn.classList.add('active');
-      modeBlueprintBtn.classList.remove('active');
-      const data = PROJECT_LAYOUTS_DATA[currentLayoutKey];
-      if (data && layoutImg) {
-        layoutImg.src = data.groundImg;
-        layoutImg.style.objectFit = 'cover';
-        layoutImg.style.backgroundColor = 'transparent';
-      }
-    });
-  }
-
-  if (modalTriggerBtn) {
-    modalTriggerBtn.addEventListener('click', () => {
-      openLayoutModal(currentLayoutKey);
     });
   }
 
@@ -759,13 +767,90 @@ function updateModalLayout(key) {
   if (modalBadge) modalBadge.textContent = data.badge;
   if (modalTitle) modalTitle.innerHTML = `${data.name.replace('Layout Plan', '')} <span class="gold-gradient-text">Layout Blueprint</span>`;
   if (modalSubtitle) modalSubtitle.textContent = `● ${data.loc}`;
-  if (modalBookBtn) modalBookBtn.setAttribute('data-prop-name', `${data.name} Inquiries`);
+  const modalDownloadBtn = document.getElementById('modal-layout-download-btn');
+  if (modalDownloadBtn) {
+    modalDownloadBtn.onclick = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      downloadLayoutFile(data.blueprintImg, `${key}-layout-blueprint.jpg`, data.name);
+    };
+  }
 
   if (modalTagsRow && data.tags) {
     modalTagsRow.innerHTML = data.tags.map(tag => `
       <button class="btn btn-secondary btn-sm" onclick="showToast('${tag}')">${tag}</button>
     `).join('');
   }
+}
+
+function downloadLayoutFile(url, filename, title) {
+  const cleanFilename = filename || 'hantas-layout-blueprint.jpg';
+  showToast(`Downloading ${title || 'Layout Blueprint'}...`);
+
+  // Try Canvas Base64 conversion (bulletproof across both http:// and file:///)
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = function() {
+    try {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth || img.width;
+      canvas.height = img.naturalHeight || img.height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+
+      canvas.toBlob(function(blob) {
+        if (blob) {
+          const blobUrl = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = blobUrl;
+          link.download = cleanFilename;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          setTimeout(() => URL.revokeObjectURL(blobUrl), 2000);
+          showToast(`Downloaded: ${cleanFilename}`);
+        } else {
+          fallbackBlobFetch(url, cleanFilename);
+        }
+      }, 'image/jpeg', 0.95);
+    } catch (err) {
+      fallbackBlobFetch(url, cleanFilename);
+    }
+  };
+  img.onerror = function() {
+    fallbackBlobFetch(url, cleanFilename);
+  };
+  img.src = encodeURI(url);
+}
+
+function fallbackBlobFetch(url, filename) {
+  const downloadUrl = url + (url.includes('?') ? '&' : '?') + 'download=1';
+  fetch(encodeURI(url))
+    .then(res => {
+      if (!res.ok) throw new Error('Fetch failed');
+      return res.blob();
+    })
+    .then(blob => {
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 2000);
+      showToast(`Downloaded: ${filename}`);
+    })
+    .catch(() => {
+      // Direct anchor download
+      const link = document.createElement('a');
+      link.href = encodeURI(downloadUrl);
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast(`Downloading: ${filename}`);
+    });
 }
 
 /* ==========================================================================
@@ -959,7 +1044,7 @@ function initFormHandlers() {
   if (contactForm) {
     contactForm.addEventListener('submit', (e) => {
       e.preventDefault();
-      showToast('Inquiry received. A Senior Partner will contact you discreetly within 2 hours.');
+      showToast('Site Visit Request received! Our advisory team will contact you shortly to coordinate pick-up.');
       contactForm.reset();
     });
   }
@@ -1254,8 +1339,44 @@ function initWhatsAppChatbot() {
     question: ''
   };
 
+  // Kids Running & Hugging Animation Controller (Exact WhatsApp Icon Size)
+  let hugAnimTimer = null;
+  function triggerKidsHugAnimation() {
+    triggerBtn.classList.remove('hug-playing');
+    void triggerBtn.offsetWidth; // Force CSS reflow to restart animation sequence
+    triggerBtn.classList.add('hug-playing');
+
+    const tooltip = document.getElementById('whatsapp-trigger-tooltip');
+    if (tooltip) {
+      tooltip.textContent = "Welcome to Hantas! 🤗💚";
+      tooltip.style.opacity = '1';
+      tooltip.style.visibility = 'visible';
+      clearTimeout(hugAnimTimer);
+      hugAnimTimer = setTimeout(() => {
+        tooltip.textContent = "Chat with HantasProperties AI";
+        tooltip.style.opacity = '';
+        tooltip.style.visibility = '';
+      }, 4500);
+    }
+  }
+
+  // Trigger running & hugging animation on touch, hover, and click
+  triggerBtn.addEventListener('mouseenter', () => {
+    triggerKidsHugAnimation();
+  });
+
+  triggerBtn.addEventListener('touchstart', () => {
+    triggerKidsHugAnimation();
+  }, { passive: true });
+
+  // Auto-preview running and hugging sequence after 2 seconds on page load
+  setTimeout(() => {
+    triggerKidsHugAnimation();
+  }, 2200);
+
   // Toggle Chat Box Window
   triggerBtn.addEventListener('click', () => {
+    triggerKidsHugAnimation();
     const isActive = chatBox.classList.contains('active');
     if (!isActive) {
       chatBox.classList.add('active');

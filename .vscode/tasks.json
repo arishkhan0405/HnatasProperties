@@ -1,0 +1,16 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Start Local Web Server (Port 8080)",
+            "type": "shell",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File serve.ps1",
+            "isBackground": true,
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            }
+        }
+    ]
+}
