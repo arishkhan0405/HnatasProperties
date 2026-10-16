@@ -694,7 +694,7 @@ function init360Showcase() {
       e.stopPropagation();
       const data = PROJECT_LAYOUTS_DATA[currentLayoutKey];
       if (data && data.blueprintImg) {
-        downloadLayoutFile(data.blueprintImg, `${currentLayoutKey}-layout-blueprint.jpg`, data.name);
+        downloadLayoutFile(data.blueprintImg, `${currentLayoutKey}-layout-blueprint.jpg`, data.name, currentLayoutKey);
       }
     });
   }
@@ -772,7 +772,7 @@ function updateModalLayout(key) {
     modalDownloadBtn.onclick = (e) => {
       e.preventDefault();
       e.stopPropagation();
-      downloadLayoutFile(data.blueprintImg, `${key}-layout-blueprint.jpg`, data.name);
+      downloadLayoutFile(data.blueprintImg, `${key}-layout-blueprint.jpg`, data.name, key);
     };
   }
 
@@ -783,75 +783,82 @@ function updateModalLayout(key) {
   }
 }
 
-function downloadLayoutFile(url, filename, title) {
+function dataUriToBlob(dataUri) {
+  try {
+    const parts = dataUri.split(',');
+    const mimeMatch = parts[0].match(/:(.*?);/);
+    const mime = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+    const binary = atob(parts[1]);
+    const array = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+      array[i] = binary.charCodeAt(i);
+    }
+    return new Blob([array], { type: mime });
+  } catch (e) {
+    console.warn('dataUriToBlob error:', e);
+    return null;
+  }
+}
+
+function triggerAnchorDownload(downloadUrl, filename) {
+  const link = document.createElement('a');
+  link.style.display = 'none';
+  link.href = downloadUrl;
+  link.download = filename;
+  link.target = '_blank';
+  document.body.appendChild(link);
+  link.click();
+  setTimeout(() => {
+    if (link.parentNode) {
+      link.parentNode.removeChild(link);
+    }
+  }, 1000);
+}
+
+function downloadLayoutFile(url, filename, title, projectKey) {
   const cleanFilename = filename || 'hantas-layout-blueprint.jpg';
   showToast(`Downloading ${title || 'Layout Blueprint'}...`);
 
-  // Try Canvas Base64 conversion (bulletproof across both http:// and file:///)
-  const img = new Image();
-  img.crossOrigin = 'anonymous';
-  img.onload = function() {
-    try {
-      const canvas = document.createElement('canvas');
-      canvas.width = img.naturalWidth || img.width;
-      canvas.height = img.naturalHeight || img.height;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0);
+  const key = projectKey || currentLayoutKey;
 
-      canvas.toBlob(function(blob) {
-        if (blob) {
-          const blobUrl = URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.href = blobUrl;
-          link.download = cleanFilename;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          setTimeout(() => URL.revokeObjectURL(blobUrl), 2000);
-          showToast(`Downloaded: ${cleanFilename}`);
-        } else {
-          fallbackBlobFetch(url, cleanFilename);
-        }
-      }, 'image/jpeg', 0.95);
-    } catch (err) {
-      fallbackBlobFetch(url, cleanFilename);
+  // 1. Primary Method: Embedded Base64 Data URI -> in-memory Blob (100% reliable on file:// protocol, Edge, Chrome)
+  if (window.LAYOUT_BASE64_DATA && window.LAYOUT_BASE64_DATA[key]) {
+    const base64Data = window.LAYOUT_BASE64_DATA[key];
+    const blob = dataUriToBlob(base64Data);
+    if (blob) {
+      const blobUrl = URL.createObjectURL(blob);
+      triggerAnchorDownload(blobUrl, cleanFilename);
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 3000);
+      showToast(`✓ Downloaded: ${cleanFilename}`);
+      return;
+    } else {
+      triggerAnchorDownload(base64Data, cleanFilename);
+      showToast(`✓ Downloaded: ${cleanFilename}`);
+      return;
     }
-  };
-  img.onerror = function() {
-    fallbackBlobFetch(url, cleanFilename);
-  };
-  img.src = encodeURI(url);
-}
+  }
 
-function fallbackBlobFetch(url, filename) {
-  const downloadUrl = url + (url.includes('?') ? '&' : '?') + 'download=1';
+  // 2. Secondary Method: Fetch as Blob (for http:// and https:// origins)
   fetch(encodeURI(url))
     .then(res => {
-      if (!res.ok) throw new Error('Fetch failed');
+      if (!res.ok) throw new Error('Fetch failed with status ' + res.status);
       return res.blob();
     })
     .then(blob => {
       const blobUrl = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = blobUrl;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      setTimeout(() => URL.revokeObjectURL(blobUrl), 2000);
-      showToast(`Downloaded: ${filename}`);
+      triggerAnchorDownload(blobUrl, cleanFilename);
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 3000);
+      showToast(`✓ Downloaded: ${cleanFilename}`);
     })
-    .catch(() => {
-      // Direct anchor download
-      const link = document.createElement('a');
-      link.href = encodeURI(downloadUrl);
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      showToast(`Downloading: ${filename}`);
+    .catch(err => {
+      console.warn('Fetch blob download error, attempting fallback:', err);
+      // 3. Fallback: Direct attachment anchor with ?download=1 header
+      const downloadUrl = url + (url.includes('?') ? '&' : '?') + 'download=1';
+      triggerAnchorDownload(encodeURI(downloadUrl), cleanFilename);
+      showToast(`Downloading: ${cleanFilename}`);
     });
 }
+window.downloadLayoutFile = downloadLayoutFile;
 
 /* ==========================================================================
    7. MODAL SYSTEM (VIP BOOKING, 360 TOUR, PROPERTY DETAILS)
