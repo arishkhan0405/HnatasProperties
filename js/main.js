@@ -1041,35 +1041,185 @@ function initScrollAnimations() {
 }
 
 /* ==========================================================================
-   10. FORM SUBMISSION HANDLERS
+   10. FORM SUBMISSION & DIRECT EMAIL DELIVERY (arish@hantasai.com)
    ========================================================================== */
+const TARGET_INQUIRY_EMAIL = 'arish@hantasai.com';
+
+function showSubmissionDispatchModal(data, mailtoUrl, whatsappUrl) {
+  let modal = document.getElementById('submission-dispatch-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'submission-dispatch-modal';
+    modal.className = 'modal-backdrop active';
+    modal.innerHTML = `
+      <div class="modal-container" style="max-width: 540px; text-align: center; padding: 2.25rem 2rem;">
+        <div style="width: 58px; height: 58px; background: rgba(16, 185, 129, 0.15); border: 2px solid #10b981; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem auto;">
+          <svg viewBox="0 0 24 24" width="28" height="28" stroke="#10b981" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+        </div>
+        <span class="badge-tag badge-gold" style="margin-bottom: 0.5rem;">Inquiry Registered Successfully</span>
+        <h3 style="color: #fff; font-size: 1.5rem; margin: 0.5rem 0 0.75rem 0;">Direct Dispatch to Advisory</h3>
+        <p style="color: var(--text-secondary); font-size: 0.92rem; line-height: 1.6; margin-bottom: 1.5rem;">
+          Your site visit details have been logged. To ensure immediate attention, choose your preferred channel:
+        </p>
+
+        <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.25rem;">
+          <a id="dispatch-email-btn" href="#" target="_blank" rel="noopener" class="btn btn-primary" style="justify-content: center; padding: 1rem; border-radius: 12px; font-weight: 700;">
+            <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
+            <span>Send Email to arish@hantasai.com</span>
+          </a>
+
+          <a id="dispatch-wa-btn" href="#" target="_blank" rel="noopener" class="btn" style="justify-content: center; padding: 1rem; border-radius: 12px; background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #10b981; font-weight: 700;">
+            <svg viewBox="0 0 32 32" width="20" height="20" fill="#10b981" style="margin-right: 8px;"><path d="M16 2A13 13 0 0 0 4.68 20.88L3 27l6.29-1.65A13 13 0 1 0 16 2zm0 23.6a10.55 10.55 0 0 1-5.38-1.47l-.39-.23-4 1.05 1.07-3.9-.25-.4A10.59 10.59 0 1 1 16 25.6zm5.8-7.92c-.32-.16-1.89-.93-2.18-1.04s-.5-.16-.72.16-.84 1.04-1.03 1.26-.38.25-.7.09a8.84 8.84 0 0 1-2.6-1.6 9.77 9.77 0 0 1-1.8-2.24c-.19-.32-.02-.5.14-.66s.32-.38.48-.57a2.16 2.16 0 0 0 .32-.53.59.59 0 0 0-.03-.56c-.08-.16-.72-1.74-.99-2.38s-.53-.55-.72-.56h-.62a1.2 1.2 0 0 0-.87.4 3.65 3.65 0 0 0-1.14 2.71A6.36 6.36 0 0 0 10.4 17a14.54 14.54 0 0 0 5.56 4.92c.76.33 1.35.53 1.81.68a4.35 4.35 0 0 0 2 .12 3.28 3.28 0 0 0 2.15-1.52 2.68 2.68 0 0 0 .19-1.52c-.07-.12-.24-.2-.56-.36z"/></svg>
+            <span>Send Instant WhatsApp (+91 96002 69317)</span>
+          </a>
+        </div>
+
+        <button type="button" class="btn btn-secondary btn-sm" id="dispatch-close-btn" style="width: 100%;">
+          Close Window
+        </button>
+      </div>
+    `;
+    document.body.appendChild(modal);
+  } else {
+    modal.classList.add('active');
+  }
+
+  const emailBtn = document.getElementById('dispatch-email-btn');
+  const waBtn = document.getElementById('dispatch-wa-btn');
+  const closeBtn = document.getElementById('dispatch-close-btn');
+
+  if (emailBtn) emailBtn.href = mailtoUrl;
+  if (waBtn) waBtn.href = whatsappUrl;
+  if (closeBtn) {
+    closeBtn.onclick = () => {
+      modal.classList.remove('active');
+    };
+  }
+}
+
+async function transmitInquiryToEmail(data, formType, submitBtn) {
+  const originalBtnHtml = submitBtn ? submitBtn.innerHTML : '';
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `
+      <span style="display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
+        <span style="display:inline-block; width:14px; height:14px; border:2px solid rgba(255,255,255,0.3); border-top-color:#fff; border-radius:50%; animation: spinSlow 0.8s linear infinite;"></span>
+        <span>Registering Inquiry...</span>
+      </span>
+    `;
+  }
+
+  // 1. Post to local server API (/api/inquiry) - saves to inquiries.json and dispatches 2-way emails if SMTP configured
+  let serverDispatched = false;
+  try {
+    const res = await fetch('/api/inquiry', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    if (res.ok) {
+      const result = await res.json();
+      console.log('Inquiry result from server:', result);
+      if (result.emailSent) {
+        serverDispatched = true;
+      }
+    }
+  } catch (e) {
+    console.warn('Local server inquiry API notice:', e);
+  }
+
+  // 2. Build mailto pre-filled draft URL for arish@hantasai.com
+  const projectSelected = data.selected_project || data.project_of_interest || 'General Plot Layout';
+  const mailSubject = encodeURIComponent(`Plot Inquiry: ${projectSelected} - ${data.client_name || 'Client'}`);
+  const mailBody = encodeURIComponent(
+    `Hello Hantas Properties Layout Advisory Team,\n\n` +
+    `I would like to schedule a site visit / receive layout documentation with the following details:\n\n` +
+    `• Client Name: ${data.client_name || 'Not provided'}\n` +
+    `• Phone Number: ${data.client_phone || 'Not provided'}\n` +
+    `• Email Address: ${data.client_email || 'Not provided'}\n` +
+    `• Project / Layout: ${projectSelected}\n` +
+    `• Preferred Visit Date: ${data.preferred_visit_date || 'Flexible'}\n` +
+    `• Vehicle Pick-Up Service: ${data.vehicle_pickup_service || 'Self Arrival'}\n` +
+    `• City / Location: ${data.client_city || 'Trichy'}\n` +
+    `• Special Requests & Loan Guidance: ${data.special_requests || 'None'}\n\n` +
+    `Sent from HantasProperties Trichy Website.`
+  );
+  const mailtoUrl = `mailto:${TARGET_INQUIRY_EMAIL}?subject=${mailSubject}&body=${mailBody}`;
+
+  // 3. Build Instant WhatsApp message
+  const waLines = [
+    `*New Site Visit Inquiry - Hantas Properties*`,
+    ``,
+    `• *Project:* ${projectSelected}`,
+    `• *Name:* ${data.client_name || 'Not provided'}`,
+    `• *Phone:* ${data.client_phone || 'Not provided'}`,
+    data.client_email ? `• *Email:* ${data.client_email}` : null,
+    `• *Preferred Visit Date:* ${data.preferred_visit_date || 'Flexible'}`,
+    `• *Vehicle Pick-up:* ${data.vehicle_pickup_service || 'Self Arrival'}`,
+    data.client_city ? `• *City:* ${data.client_city}` : null,
+    data.special_requests ? `• *Notes:* ${data.special_requests}` : null,
+    ``,
+    `Hello Hantas Properties, please confirm my site visit appointment and share layout blueprint.`
+  ].filter(Boolean).join("\n");
+  const waUrl = `https://wa.me/919600269317?text=${encodeURIComponent(waLines)}`;
+
+  if (typeof playChimeSound === 'function') playChimeSound(880, 0.15, 'sine');
+
+  if (serverDispatched) {
+    showToast(`✓ Inquiry received! Automated emails sent to ${TARGET_INQUIRY_EMAIL} and ${data.client_email || 'your email'}.`);
+    document.querySelectorAll('.modal-backdrop').forEach(m => m.classList.remove('active'));
+  } else {
+    // If SMTP is waiting for credentials, open the dispatch modal
+    showSubmissionDispatchModal(data, mailtoUrl, waUrl);
+    showToast(`Inquiry captured in inquiries.log! Click below to send email to ${TARGET_INQUIRY_EMAIL}`);
+  }
+
+  if (submitBtn) {
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = originalBtnHtml;
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  return true;
+}
+
 function initFormHandlers() {
   const contactForm = document.getElementById('luxury-inquiry-form');
   const modalBookingForm = document.getElementById('modal-vip-form');
-  const newsletterForm = document.querySelector('.newsletter-form');
+  const backToTopBtn = document.getElementById('footer-back-to-top');
 
+  if (backToTopBtn) {
+    backToTopBtn.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+
+  // 1. Main Luxury Inquiry Form
   if (contactForm) {
-    contactForm.addEventListener('submit', (e) => {
+    contactForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      showToast('Site Visit Request received! Our advisory team will contact you shortly to coordinate pick-up.');
+      const submitBtn = contactForm.querySelector('button[type="submit"]');
+      const formData = new FormData(contactForm);
+      const data = Object.fromEntries(formData.entries());
+
+      await transmitInquiryToEmail(data, 'Main Contact Form Inquiry', submitBtn);
       contactForm.reset();
     });
   }
 
+  // 2. Modal VIP Booking Form
   if (modalBookingForm) {
-    modalBookingForm.addEventListener('submit', (e) => {
+    modalBookingForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      showToast('VIP Private Viewing appointment booked. Concierge confirmation sent.');
-      document.querySelectorAll('.modal-backdrop').forEach((m) => m.classList.remove('active'));
-      modalBookingForm.reset();
-    });
-  }
+      const submitBtn = modalBookingForm.querySelector('button[type="submit"]');
+      const formData = new FormData(modalBookingForm);
+      const data = Object.fromEntries(formData.entries());
 
-  if (newsletterForm) {
-    newsletterForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      showToast('Subscribed to HantasProperties Private Layout Updates.');
-      newsletterForm.reset();
+      await transmitInquiryToEmail(data, 'VIP Site Visit Modal Booking', submitBtn);
+      setTimeout(() => {
+        document.querySelectorAll('.modal-backdrop').forEach((m) => m.classList.remove('active'));
+      }, 1200);
+      modalBookingForm.reset();
     });
   }
 }
@@ -1333,7 +1483,7 @@ function initWhatsAppChatbot() {
   if (!triggerBtn || !chatBox) return;
 
   // 1. Single Configurable Business WhatsApp Variable
-  const BUSINESS_WHATSAPP = "+9177044 50500";
+  const BUSINESS_WHATSAPP = "+91 96002 69317";
 
   // Conversational Lead State
   let currentStep = 0; // 0: Name, 1: Phone, 2: Requirement, 3: Location, 4: Budget, 5: Question/Ready
@@ -1346,44 +1496,32 @@ function initWhatsAppChatbot() {
     question: ''
   };
 
-  // Kids Running & Hugging Animation Controller (Exact WhatsApp Icon Size)
-  let hugAnimTimer = null;
-  function triggerKidsHugAnimation() {
-    triggerBtn.classList.remove('hug-playing');
-    void triggerBtn.offsetWidth; // Force CSS reflow to restart animation sequence
-    triggerBtn.classList.add('hug-playing');
-
-    const tooltip = document.getElementById('whatsapp-trigger-tooltip');
-    if (tooltip) {
-      tooltip.textContent = "Welcome to Hantas! 🤗💚";
-      tooltip.style.opacity = '1';
-      tooltip.style.visibility = 'visible';
-      clearTimeout(hugAnimTimer);
-      hugAnimTimer = setTimeout(() => {
-        tooltip.textContent = "Chat with HantasProperties AI";
-        tooltip.style.opacity = '';
-        tooltip.style.visibility = '';
-      }, 4500);
-    }
+  // WhatsApp Icon Rotation Animation Controller
+  function triggerWhatsAppIconRotate() {
+    triggerBtn.classList.remove('rotate-anim');
+    void triggerBtn.offsetWidth; // Force CSS reflow to re-trigger rotation cleanly on every touch
+    triggerBtn.classList.add('rotate-anim');
   }
 
-  // Trigger running & hugging animation on touch, hover, and click
+  // Remove animation class after spin finishes so next touch retriggers
+  triggerBtn.addEventListener('animationend', (e) => {
+    if (e.animationName === 'whatsappIconSpin') {
+      triggerBtn.classList.remove('rotate-anim');
+    }
+  });
+
+  // Trigger rotation animation on touch (mobile) and hover (desktop)
   triggerBtn.addEventListener('mouseenter', () => {
-    triggerKidsHugAnimation();
+    triggerWhatsAppIconRotate();
   });
 
   triggerBtn.addEventListener('touchstart', () => {
-    triggerKidsHugAnimation();
+    triggerWhatsAppIconRotate();
   }, { passive: true });
-
-  // Auto-preview running and hugging sequence after 2 seconds on page load
-  setTimeout(() => {
-    triggerKidsHugAnimation();
-  }, 2200);
 
   // Toggle Chat Box Window
   triggerBtn.addEventListener('click', () => {
-    triggerKidsHugAnimation();
+    triggerWhatsAppIconRotate();
     const isActive = chatBox.classList.contains('active');
     if (!isActive) {
       chatBox.classList.add('active');
@@ -1406,22 +1544,20 @@ function initWhatsAppChatbot() {
       const intent = btn.getAttribute('data-intent');
       if (intent) {
         leadState.requirement = intent;
-        if (!leadState.question) leadState.question = intent;
+        leadState.question = intent;
         appendUserMsg(intent);
 
-        if (!leadState.name) {
+        const quickWaUrl = generateWhatsAppURL(leadState);
+        setTimeout(() => {
+          appendBotMsg(
+            `Great choice! 📍 <strong>${escapeHtml(intent)}</strong> is a premier layout option.<br><br>` +
+            `<a href="${quickWaUrl}" target="_blank" rel="noopener" class="wa-send-enquiry-btn" style="margin: 6px 0 10px 0; display: inline-flex;">` +
+            `<svg viewBox="0 0 32 32" width="16" height="16" fill="none"><path fill="#FFFFFF" d="M16 2A13 13 0 0 0 4.68 20.88L3 27l6.29-1.65A13 13 0 1 0 16 2zm0 23.6a10.55 10.55 0 0 1-5.38-1.47l-.39-.23-4 1.05 1.07-3.9-.25-.4A10.59 10.59 0 1 1 16 25.6zm5.8-7.92c-.32-.16-1.89-.93-2.18-1.04s-.5-.16-.72.16-.84 1.04-1.03 1.26-.38.25-.7.09a8.84 8.84 0 0 1-2.6-1.6 9.77 9.77 0 0 1-1.8-2.24c-.19-.32-.02-.5.14-.66s.32-.38.48-.57a2.16 2.16 0 0 0 .32-.53.59.59 0 0 0-.03-.56c-.08-.16-.72-1.74-.99-2.38s-.53-.55-.72-.56h-.62a1.2 1.2 0 0 0-.87.4 3.65 3.65 0 0 0-1.14 2.71A6.36 6.36 0 0 0 10.4 17a14.54 14.54 0 0 0 5.56 4.92c.76.33 1.35.53 1.81.68a4.35 4.35 0 0 0 2 .12 3.28 3.28 0 0 0 2.15-1.52 2.68 2.68 0 0 0 .19-1.52c-.07-.12-.24-.2-.56-.36z"/></svg>` +
+            `👉 Send Inquiry on WhatsApp</a><br>` +
+            `Or enter your <strong>Full Name</strong> below to schedule a site visit:`
+          );
           currentStep = 0;
-          setTimeout(() => {
-            appendBotMsg(`Great choice! 📍 <strong>${escapeHtml(intent)}</strong> is a premier layout option.<br><br>May I know your <strong>Full Name</strong>?`);
-          }, 300);
-        } else if (!leadState.phone) {
-          currentStep = 1;
-          setTimeout(() => {
-            appendBotMsg(`Thanks <strong>${escapeHtml(leadState.name)}</strong>! Please enter your <strong>10-digit Mobile Number</strong>:`);
-          }, 300);
-        } else {
-          showEnquirySummaryCard();
-        }
+        }, 300);
       }
     });
   });
@@ -1450,95 +1586,57 @@ function initWhatsAppChatbot() {
       }, 300);
 
     } else if (currentStep === 1) {
-      // Step 1: Validate & Collect Phone
-      if (validatePhone(inputVal)) {
-        leadState.phone = inputVal;
-        currentStep = 2;
-        setTimeout(() => {
-          appendBotMsg(`Got it! 📱 <strong>${escapeHtml(leadState.phone)}</strong><br><br>What type of property layout are you interested in?`, [
-            { text: "📍 Commercial NH Frontage", val: "Commercial NH Frontage Plots" },
-            { text: "💎 Diamond East/North Facing", val: "Diamond East/North Facing Plots" },
-            { text: "Platinum Dual Corner", val: "Platinum Dual Corner Plots" },
-            { text: "Villa Land Compound", val: "Combined Villa Land Compound" }
-          ]);
-        }, 300);
-      } else {
-        // Invalid phone number - prompt gently without blocking
-        setTimeout(() => {
-          appendBotMsg(`⚠️ Please enter a valid 10-digit phone number (e.g. 98424 00000) so we can send the layout PDF via WhatsApp.`);
-        }, 300);
-      }
-
-    } else if (currentStep === 2) {
-      // Step 2: Collect Requirement
-      leadState.requirement = inputVal;
-      currentStep = 3;
+      // Step 1: Collect Phone
+      leadState.phone = inputVal;
+      currentStep = 2;
       setTimeout(() => {
-        appendBotMsg(`Selected: 🏠 <strong>${escapeHtml(leadState.requirement)}</strong><br><br>What is your preferred location / city?`, [
-          { text: "Trichy / Manikandam", val: "Trichy / Manikandam" },
-          { text: "Chennai", val: "Chennai" },
-          { text: "NRI Location (Dubai/Singapore)", val: "NRI Location" }
-        ]);
-      }, 300);
-
-    } else if (currentStep === 3) {
-      // Step 3: Collect Location
-      leadState.location = inputVal;
-      currentStep = 4;
-      setTimeout(() => {
-        appendBotMsg(`Got it: 📍 <strong>${escapeHtml(leadState.location)}</strong><br><br>What is your estimated budget range?`, [
-          { text: "₹15 Lakhs - ₹25 Lakhs", val: "₹15L - ₹25L" },
-          { text: "₹25 Lakhs - ₹50 Lakhs", val: "₹25L - ₹50L" },
-          { text: "₹50 Lakhs+", val: "₹50L+" }
-        ]);
-      }, 300);
-
-    } else if (currentStep === 4) {
-      // Step 4: Collect Budget
-      leadState.budget = inputVal;
-      currentStep = 5;
-      setTimeout(() => {
-        appendBotMsg(`Noted: 💰 Budget <strong>${escapeHtml(leadState.budget)}</strong><br><br>Do you have any specific question, plot direction preference, or site visit date?`);
+        showEnquirySummaryCard();
       }, 300);
 
     } else {
-      // Step 5+: Collect Question / Final details
-      if (!leadState.question || leadState.question === 'Not provided') {
-        leadState.question = inputVal;
-      }
+      // Freeform message / question
+      leadState.question = inputVal;
+      if (!leadState.requirement) leadState.requirement = inputVal;
       showEnquirySummaryCard();
     }
   }
 
-  // 12. Phone Number Validation (checks digits length >= 10)
+  // Phone Number Validation (checks digits length >= 10)
   function validatePhone(phoneStr) {
     if (!phoneStr) return false;
     const cleanDigits = phoneStr.replace(/\D/g, '');
     return cleanDigits.length >= 10 && cleanDigits.length <= 15;
   }
 
-  // 3 & 5 & 13. Generate Pre-filled Encoded WhatsApp URL
+  // Generate Clean Pre-filled Encoded WhatsApp URL
   function generateWhatsAppURL(data) {
-    const name = (data.name && data.name.trim()) ? data.name.trim() : 'Not provided';
-    const phone = (data.phone && data.phone.trim()) ? data.phone.trim() : 'Not provided';
-    const requirement = (data.requirement && data.requirement.trim()) ? data.requirement.trim() : 'Not provided';
-    const location = (data.location && data.location.trim()) ? data.location.trim() : 'Not provided';
-    const budget = (data.budget && data.budget.trim()) ? data.budget.trim() : 'Not provided';
-    const question = (data.question && data.question.trim()) ? data.question.trim() : 'Not provided';
+    const lines = [];
+    lines.push("*New Website Enquiry - Hantas Properties*");
+    lines.push("");
 
-    const message = `🔔 NEW WEBSITE ENQUIRY
+    if (data.requirement && data.requirement.trim() && data.requirement !== 'Not provided') {
+      lines.push(`• *Requirement:* ${data.requirement.trim()}`);
+    }
+    if (data.name && data.name.trim() && data.name !== 'Not provided') {
+      lines.push(`• *Name:* ${data.name.trim()}`);
+    }
+    if (data.phone && data.phone.trim() && data.phone !== 'Not provided') {
+      lines.push(`• *Phone:* ${data.phone.trim()}`);
+    }
+    if (data.location && data.location.trim() && data.location !== 'Not provided') {
+      lines.push(`• *Location:* ${data.location.trim()}`);
+    }
+    if (data.budget && data.budget.trim() && data.budget !== 'Not provided') {
+      lines.push(`• *Budget:* ${data.budget.trim()}`);
+    }
+    if (data.question && data.question.trim() && data.question !== 'Not provided' && data.question.trim() !== (data.requirement || '').trim()) {
+      lines.push(`• *Message:* ${data.question.trim()}`);
+    }
 
-👤 Name: ${name}
-📱 Phone: ${phone}
-🏠 Requirement: ${requirement}
-📍 Location: ${location}
-💰 Budget: ${budget}
+    lines.push("");
+    lines.push("Hello Hantas Properties, please share plot details, pricing & layout blueprint.");
 
-💬 Customer Question:
-${question}
-
-🌐 Source: Real Estate Website`;
-
+    const message = lines.join("\n");
     const cleanNumber = BUSINESS_WHATSAPP.replace(/[^\d]/g, '');
     return `https://wa.me/${cleanNumber}?text=${encodeURIComponent(message)}`;
   }
@@ -1547,24 +1645,34 @@ ${question}
   function showEnquirySummaryCard() {
     const whatsappURL = generateWhatsAppURL(leadState);
 
+    let detailsHtml = '';
+    if (leadState.requirement && leadState.requirement !== 'Not provided') {
+      detailsHtml += `<div class="wa-summary-line"><span class="wa-summary-label">Requirement:</span> <span class="wa-summary-val">${escapeHtml(leadState.requirement)}</span></div>`;
+    }
+    if (leadState.name && leadState.name !== 'Not provided') {
+      detailsHtml += `<div class="wa-summary-line"><span class="wa-summary-label">Name:</span> <span class="wa-summary-val">${escapeHtml(leadState.name)}</span></div>`;
+    }
+    if (leadState.phone && leadState.phone !== 'Not provided') {
+      detailsHtml += `<div class="wa-summary-line"><span class="wa-summary-label">Phone:</span> <span class="wa-summary-val">${escapeHtml(leadState.phone)}</span></div>`;
+    }
+    if (leadState.location && leadState.location !== 'Not provided') {
+      detailsHtml += `<div class="wa-summary-line"><span class="wa-summary-label">Location:</span> <span class="wa-summary-val">${escapeHtml(leadState.location)}</span></div>`;
+    }
+    if (leadState.budget && leadState.budget !== 'Not provided') {
+      detailsHtml += `<div class="wa-summary-line"><span class="wa-summary-label">Budget:</span> <span class="wa-summary-val">${escapeHtml(leadState.budget)}</span></div>`;
+    }
+    if (leadState.question && leadState.question !== 'Not provided' && leadState.question !== leadState.requirement) {
+      detailsHtml += `<div class="wa-summary-line"><span class="wa-summary-label">Question:</span> <span class="wa-summary-val">${escapeHtml(leadState.question)}</span></div>`;
+    }
+
     const summaryHtml = `
       <div class="whatsapp-msg whatsapp-msg-bot">
         <div class="whatsapp-msg-bubble">
-          <strong>Enquiry Ready to Send! 🚀</strong><br>
-          Review your details below:
-          
-          <div class="wa-summary-card">
-            <div class="wa-summary-line"><span class="wa-summary-label">👤 Name:</span> <span class="wa-summary-val">${escapeHtml(leadState.name || 'Not provided')}</span></div>
-            <div class="wa-summary-line"><span class="wa-summary-label">📱 Phone:</span> <span class="wa-summary-val">${escapeHtml(leadState.phone || 'Not provided')}</span></div>
-            <div class="wa-summary-line"><span class="wa-summary-label">🏠 Requirement:</span> <span class="wa-summary-val">${escapeHtml(leadState.requirement || 'Not provided')}</span></div>
-            <div class="wa-summary-line"><span class="wa-summary-label">📍 Location:</span> <span class="wa-summary-val">${escapeHtml(leadState.location || 'Not provided')}</span></div>
-            <div class="wa-summary-line"><span class="wa-summary-label">💰 Budget:</span> <span class="wa-summary-val">${escapeHtml(leadState.budget || 'Not provided')}</span></div>
-            <div class="wa-summary-line"><span class="wa-summary-label">💬 Question:</span> <span class="wa-summary-val">${escapeHtml(leadState.question || 'Not provided')}</span></div>
-          </div>
-
-          <a href="${whatsappURL}" target="_blank" rel="noopener" class="wa-send-enquiry-btn">
-            <svg viewBox="0 0 32 32" width="20" height="20" fill="none"><path fill="#FFFFFF" d="M16 2A13 13 0 0 0 4.68 20.88L3 27l6.29-1.65A13 13 0 1 0 16 2zm0 23.6a10.55 10.55 0 0 1-5.38-1.47l-.39-.23-4 1.05 1.07-3.9-.25-.4A10.59 10.59 0 1 1 16 25.6zm5.8-7.92c-.32-.16-1.89-.93-2.18-1.04s-.5-.16-.72.16-.84 1.04-1.03 1.26-.38.25-.7.09a8.84 8.84 0 0 1-2.6-1.6 9.77 9.77 0 0 1-1.8-2.24c-.19-.32-.02-.5.14-.66s.32-.38.48-.57a2.16 2.16 0 0 0 .32-.53.59.59 0 0 0-.03-.56c-.08-.16-.72-1.74-.99-2.38s-.53-.55-.72-.56h-.62a1.2 1.2 0 0 0-.87.4 3.65 3.65 0 0 0-1.14 2.71A6.36 6.36 0 0 0 10.4 17a14.54 14.54 0 0 0 5.56 4.92c.76.33 1.35.53 1.81.68a4.35 4.35 0 0 0 2 .12 3.28 3.28 0 0 0 2.15-1.52 2.68 2.68 0 0 0 .19-1.52c-.07-.12-.24-.2-.56-.36z"/></svg>
-            Send Enquiry on WhatsApp
+          <strong>Enquiry Ready to Send!</strong><br>
+          ${detailsHtml ? `<div class="wa-summary-card">${detailsHtml}</div>` : ''}
+          <a href="${whatsappURL}" target="_blank" rel="noopener" class="wa-send-enquiry-btn" style="margin-top: 8px;">
+            <svg viewBox="0 0 32 32" width="18" height="18" fill="none"><path fill="#FFFFFF" d="M16 2A13 13 0 0 0 4.68 20.88L3 27l6.29-1.65A13 13 0 1 0 16 2zm0 23.6a10.55 10.55 0 0 1-5.38-1.47l-.39-.23-4 1.05 1.07-3.9-.25-.4A10.59 10.59 0 1 1 16 25.6zm5.8-7.92c-.32-.16-1.89-.93-2.18-1.04s-.5-.16-.72.16-.84 1.04-1.03 1.26-.38.25-.7.09a8.84 8.84 0 0 1-2.6-1.6 9.77 9.77 0 0 1-1.8-2.24c-.19-.32-.02-.5.14-.66s.32-.38.48-.57a2.16 2.16 0 0 0 .32-.53.59.59 0 0 0-.03-.56c-.08-.16-.72-1.74-.99-2.38s-.53-.55-.72-.56h-.62a1.2 1.2 0 0 0-.87.4 3.65 3.65 0 0 0-1.14 2.71A6.36 6.36 0 0 0 10.4 17a14.54 14.54 0 0 0 5.56 4.92c.76.33 1.35.53 1.81.68a4.35 4.35 0 0 0 2 .12 3.28 3.28 0 0 0 2.15-1.52 2.68 2.68 0 0 0 .19-1.52c-.07-.12-.24-.2-.56-.36z"/></svg>
+            Send Message on WhatsApp
           </a>
         </div>
         <div class="whatsapp-msg-time">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>

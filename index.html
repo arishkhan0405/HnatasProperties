@@ -1344,8 +1344,9 @@
               <div>
                 <h4 style="color: #ffffff; font-size: 1.1rem; font-weight: 700; margin-bottom: 0.25rem;">Direct Booking
                   Hotline</h4>
-                <p style="margin: 0; font-size: 1rem; font-weight: 700; color: var(--gold-light, #ffd700);">+91 98424
-                  00000 / +91 94431 00000</p>
+                <p style="margin: 0; font-size: 1rem; font-weight: 700; color: var(--gold-light, #ffd700);">
+                  <a href="tel:+919600269317" style="color: inherit; text-decoration: none;">+91 96002 69317</a>
+                </p>
                 <p style="margin: 0; font-size: 0.82rem; font-weight: 500; color: #cbd5e1;">Daily 8:00 AM - 8:00 PM Site
                   Consultation</p>
               </div>
@@ -1359,8 +1360,9 @@
                 <h4 style="color: #ffffff; font-size: 1.1rem; font-weight: 700; margin-bottom: 0.25rem;">Layout
                   Inquiries</h4>
                 <p style="margin: 0; font-size: 1rem; font-weight: 700; color: var(--gold-light, #ffd700);">
-                  sales@hantasproperties.com</p>
-                <p style="margin: 0; font-size: 0.82rem; font-weight: 500; color: #cbd5e1;">DTCP & Plot Map Document
+                  <a href="mailto:arish@hantasai.com" style="color: inherit; text-decoration: none;">arish@hantasai.com</a>
+                </p>
+                <p style="margin: 0.25rem 0 0 0; font-size: 0.82rem; font-weight: 500; color: #cbd5e1;">DTCP &amp; Plot Map Document
                   Copy Available</p>
               </div>
             </div>
@@ -1376,7 +1378,7 @@
             </div>
 
             <!-- WhatsApp Instant VIP Chat -->
-            <a href="https://wa.me/919842400000?text=Hi%20HantasProperties,%20I%20want%20to%20know%20plot%20details"
+            <a href="https://wa.me/919600269317?text=Hi%20HantasProperties,%20I%20want%20to%20know%20plot%20details"
               target="_blank" rel="noopener" class="btn"
               style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.5); justify-content: flex-start; padding: 1.1rem 1.5rem; border-radius: 14px;">
               <i data-lucide="message-circle" style="color: #10b981; width: 24px; height: 24px; flex-shrink: 0;"></i>
@@ -1392,16 +1394,26 @@
 
           <!-- Contact Form Panel -->
           <div class="contact-form-panel reveal reveal-right">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.5rem;">
+              <span class="badge-tag badge-gold" style="font-size: 0.75rem;">
+                <i data-lucide="mail-check" style="width: 13px; height: 13px;"></i>
+                Direct Delivery to arish@hantasai.com
+              </span>
+              <span style="font-size: 0.78rem; color: #10b981; font-weight: 600;">
+                ● Instant Advisory Dispatch
+              </span>
+            </div>
+
             <form id="luxury-inquiry-form">
               <div class="form-grid-2">
                 <div>
                   <label class="input-label" for="contact-name">Full Name *</label>
-                  <input type="text" id="contact-name" class="luxury-input" placeholder="e.g. R. Ananthakrishnan"
+                  <input type="text" id="contact-name" name="client_name" class="luxury-input" placeholder="e.g. R. Ananthakrishnan"
                     required>
                 </div>
                 <div>
                   <label class="input-label" for="contact-email">Email Address *</label>
-                  <input type="email" id="contact-email" class="luxury-input" placeholder="e.g. client@email.com"
+                  <input type="email" id="contact-email" name="client_email" class="luxury-input" placeholder="e.g. client@email.com"
                     required>
                 </div>
               </div>
@@ -1409,11 +1421,11 @@
               <div class="form-grid-2">
                 <div>
                   <label class="input-label" for="contact-phone">Phone Number *</label>
-                  <input type="tel" id="contact-phone" class="luxury-input" placeholder="+91 98765 43210" required>
+                  <input type="tel" id="contact-phone" name="client_phone" class="luxury-input" placeholder="+91 98765 43210" required>
                 </div>
                 <div>
                   <label class="input-label" for="contact-property">Project of Interest</label>
-                  <select id="contact-property" class="luxury-input" aria-label="Project of Interest">
+                  <select id="contact-property" name="project_of_interest" class="luxury-input" aria-label="Project of Interest">
                     <option value="General Layout Inquiry">General Plot Layout Inquiry</option>
                     <option value="Grand Empire Project">Grand Empire (395 Plots @ Manikandam)</option>
                     <option value="Akshayam Project">Akshayam (DTCP #131/2026 @ Manikandam)</option>
@@ -1445,7 +1457,7 @@
                   placeholder="Mention preferred plot direction, bank loan requirements, or family count..."></textarea>
               </div>
 
-              <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">
+              <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;" id="luxury-form-submit-btn">
                 <span>Submit Site Visit Request</span>
                 <i data-lucide="check-circle" style="width: 16px; height: 16px;"></i>
               </button>
@@ -1456,6 +1468,97 @@
     </section>
   </main>
 
+  <!-- ==========================================================================
+       SITE FOOTER
+       ========================================================================== -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-top-grid">
+        <!-- Col 1: Brand Info -->
+        <div class="footer-brand-col">
+          <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+            <div class="brand-logo-card" style="width: 44px; height: 44px;">
+              <img src="Images/logo.jpg" alt="HantasProperties Logo" class="brand-logo-img">
+            </div>
+            <div>
+              <span class="logo-title" style="font-size: 1.35rem; display: block;">HantasProperties</span>
+              <span class="logo-tagline" style="font-size: 0.68rem; letter-spacing: 0.12em; color: var(--gold-light);">PREMIER REAL ESTATE TRICHY</span>
+            </div>
+          </div>
+          <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.65;">
+            Your future begins with the right property. DTCP &amp; RERA approved residential layouts across Manikandam &amp; Nagamangalam, Trichy with clear titles and transparent pricing.
+          </p>
+          <div class="footer-socials">
+            <a href="https://wa.me/919600269317" target="_blank" rel="noopener" class="social-btn" aria-label="WhatsApp">
+              <i data-lucide="message-circle"></i>
+            </a>
+            <a href="mailto:arish@hantasai.com" class="social-btn" aria-label="Email arish@hantasai.com">
+              <i data-lucide="mail"></i>
+            </a>
+            <a href="tel:+919600269317" class="social-btn" aria-label="Call +91 96002 69317">
+              <i data-lucide="phone"></i>
+            </a>
+          </div>
+        </div>
+
+        <!-- Col 2: Premier Layouts -->
+        <div>
+          <h4 class="footer-heading">Premier Layouts</h4>
+          <ul class="footer-links-list" style="list-style: none; padding: 0; margin: 0;">
+            <li><a href="#showcase">Grand Empire (395 Plots)</a></li>
+            <li><a href="#showcase">Akshayam (DTCP #131/2026)</a></li>
+            <li><a href="#showcase">Kings Avenue-II (33ft NH Road)</a></li>
+            <li><a href="#showcase">Crystal (₹850/Sq.Ft)</a></li>
+            <li><a href="#gallery">Site Gallery &amp; Arches</a></li>
+          </ul>
+        </div>
+
+        <!-- Col 3: Quick Navigation -->
+        <div>
+          <h4 class="footer-heading">Quick Links</h4>
+          <ul class="footer-links-list" style="list-style: none; padding: 0; margin: 0;">
+            <li><a href="#hero">Home</a></li>
+            <li><a href="#about">About Township</a></li>
+            <li><a href="#amenities">Project Amenities</a></li>
+            <li><a href="#contact">Contact Advisory</a></li>
+            <li><a href="javascript:void(0)" class="open-booking-modal-btn">Book Free Site Visit</a></li>
+          </ul>
+        </div>
+
+        <!-- Col 4: Contact & Direct Inquiries -->
+        <div>
+          <h4 class="footer-heading">Layout Advisory</h4>
+          <p style="color: var(--text-secondary); font-size: 0.88rem; line-height: 1.6; margin-bottom: 0.75rem;">
+            Direct inquiries delivered straight to:
+          </p>
+          <p style="margin: 0 0 0.6rem 0;">
+            <a href="mailto:arish@hantasai.com" style="color: var(--gold-light); font-weight: 700; text-decoration: none; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 8px;">
+              <i data-lucide="mail" style="width: 15px; height: 15px;"></i>
+              arish@hantasai.com
+            </a>
+          </p>
+          <p style="margin: 0 0 0.6rem 0;">
+            <a href="tel:+919600269317" style="color: #ffffff; text-decoration: none; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 8px;">
+              <i data-lucide="phone-call" style="width: 15px; height: 15px; color: var(--gold-light);"></i>
+              +91 96002 69317
+            </a>
+          </p>
+          <p style="color: var(--text-muted); font-size: 0.82rem; margin-top: 0.75rem; line-height: 1.5;">
+            No.47A, Regiment Bazar, Renganathapuram, Thennur, Trichy, Tamil Nadu - 620017
+          </p>
+        </div>
+      </div>
+
+      <div class="footer-bottom-bar">
+        <div>
+          &copy; 2026 HantasProperties. All rights reserved. DTCP &amp; RERA Registered Plots, Trichy.
+        </div>
+        <button class="back-to-top-btn" id="footer-back-to-top" aria-label="Back to Top">
+          <i data-lucide="arrow-up" style="width: 18px; height: 18px;"></i>
+        </button>
+      </div>
+    </div>
+  </footer>
 
   <!-- ==========================================================================
        MODALS
@@ -1474,7 +1577,7 @@
         </h3>
         <p style="font-size: 0.95rem; color: var(--text-secondary); max-width: 550px; margin: 0 auto;">
           Our site manager will arrange a complimentary vehicle pick-up from Trichy Railway Station, Airport, or Bus
-          Stand.
+          Stand. Inquiries are sent directly to arish@hantasai.com.
         </p>
       </div>
 
@@ -1482,23 +1585,30 @@
         <div class="form-grid-2">
           <div>
             <label class="input-label" for="modal-booking-name">Full Name *</label>
-            <input type="text" id="modal-booking-name" class="luxury-input" placeholder="Your Name" required>
+            <input type="text" id="modal-booking-name" name="client_name" class="luxury-input" placeholder="Your Name" required>
           </div>
           <div>
             <label class="input-label" for="modal-booking-email">Mobile Number *</label>
-            <input type="tel" id="modal-booking-email" class="luxury-input" placeholder="+91 98765 43210" required>
+            <input type="tel" id="modal-booking-email" name="client_phone" class="luxury-input" placeholder="+91 98765 43210" required>
           </div>
         </div>
 
         <div class="form-grid-2">
           <div>
-            <label class="input-label" for="modal-booking-phone">City / Location</label>
-            <input type="text" id="modal-booking-phone" class="luxury-input"
-              placeholder="Trichy / Chennai / NRI Location">
+            <label class="input-label" for="modal-booking-user-email">Email Address</label>
+            <input type="email" id="modal-booking-user-email" name="client_email" class="luxury-input" placeholder="e.g. client@email.com">
           </div>
           <div>
+            <label class="input-label" for="modal-booking-phone">City / Location</label>
+            <input type="text" id="modal-booking-phone" name="client_city" class="luxury-input"
+              placeholder="Trichy / Chennai / NRI Location">
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div>
             <label class="input-label" for="modal-booking-prop-name">Selected Category / Project</label>
-            <select id="modal-booking-prop-name" class="luxury-input" aria-label="Selected Category / Project">
+            <select id="modal-booking-prop-name" name="selected_project" class="luxury-input" aria-label="Selected Category / Project">
               <option value="General Plot Booking Inquiry">General Plot Booking Inquiry</option>
               <option value="Grand Empire Project">Grand Empire (395 Plots @ Manikandam)</option>
               <option value="Akshayam Project">Akshayam (DTCP #131/2026 @ Manikandam)</option>
@@ -1506,31 +1616,29 @@
               <option value="Crystal Project">Crystal (₹850/Sq.Ft @ Nagamangalam)</option>
             </select>
           </div>
-        </div>
-
-        <div class="form-grid-2">
           <div>
             <label class="input-label" for="modal-booking-date">Preferred Visit Date</label>
-            <input type="date" id="modal-booking-date" class="luxury-input" required>
-          </div>
-          <div>
-            <label class="input-label" for="modal-booking-transport">Vehicle Pick-Up Service</label>
-            <select id="modal-booking-transport" class="luxury-input" aria-label="Transport Pick-up Option">
-              <option value="Self Vehicle">Self Vehicle Arrival</option>
-              <option value="Trichy Bus Terminal Pick Up">Trichy New Bus Terminal Pick-up</option>
-              <option value="Trichy Railway Station Pick Up">Trichy Railway Station Pick-up</option>
-              <option value="Trichy Airport Pick Up">Trichy Airport Pick-up</option>
-            </select>
+            <input type="date" id="modal-booking-date" name="preferred_visit_date" class="luxury-input" required>
           </div>
         </div>
 
         <div class="form-group-full">
+          <label class="input-label" for="modal-booking-transport">Vehicle Pick-Up Service</label>
+          <select id="modal-booking-transport" name="vehicle_pickup_service" class="luxury-input" aria-label="Transport Pick-up Option">
+            <option value="Self Vehicle">Self Vehicle Arrival</option>
+            <option value="Trichy Bus Terminal Pick Up">Trichy New Bus Terminal Pick-up</option>
+            <option value="Trichy Railway Station Pick Up">Trichy Railway Station Pick-up</option>
+            <option value="Trichy Airport Pick Up">Trichy Airport Pick-up</option>
+          </select>
+        </div>
+
+        <div class="form-group-full">
           <label class="input-label" for="modal-booking-notes">Special Requests / Bank Loan Guidance</label>
-          <textarea id="modal-booking-notes" class="luxury-input"
+          <textarea id="modal-booking-notes" name="special_requests" class="luxury-input"
             placeholder="Mention preferred plot direction, bank loan requirements, or family count..."></textarea>
         </div>
 
-        <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">
+        <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;" id="modal-form-submit-btn">
           <span>Confirm Site Visit Reservation</span>
           <i data-lucide="check-circle" style="width: 18px; height: 18px;"></i>
         </button>
@@ -1644,55 +1752,22 @@
 
   <!-- Interactive WhatsApp AI Chatbot Widget -->
   <div id="whatsapp-bot-widget" class="whatsapp-bot-wrapper">
-    <!-- Floating Trigger Button with Animated Kids Running & Hugging Effect -->
+    <!-- Floating Trigger Button with Icon Rotation -->
     <button id="whatsapp-bot-toggle" class="whatsapp-bot-trigger" aria-label="Open WhatsApp AI Assistant">
       <div class="whatsapp-trigger-pulse"></div>
 
-      <!-- Inner Circular Clipped Stage -->
+      <!-- WhatsApp SVG Icon Container -->
       <div class="whatsapp-trigger-inner">
-        <!-- Default Classic WhatsApp SVG Icon -->
         <div class="whatsapp-icon-default" id="whatsapp-icon-default">
-          <svg viewBox="0 0 32 32" width="30" height="30" fill="none">
+          <svg viewBox="0 0 32 32" width="34" height="34" fill="none" class="whatsapp-svg-icon">
             <path fill="#FFFFFF"
               d="M16 2A13 13 0 0 0 4.68 20.88L3 27l6.29-1.65A13 13 0 1 0 16 2zm0 23.6a10.55 10.55 0 0 1-5.38-1.47l-.39-.23-4 1.05 1.07-3.9-.25-.4A10.59 10.59 0 1 1 16 25.6zm5.8-7.92c-.32-.16-1.89-.93-2.18-1.04s-.5-.16-.72.16-.84 1.04-1.03 1.26-.38.25-.7.09a8.84 8.84 0 0 1-2.6-1.6 9.77 9.77 0 0 1-1.8-2.24c-.19-.32-.02-.5.14-.66s.32-.38.48-.57a2.16 2.16 0 0 0 .32-.53.59.59 0 0 0-.03-.56c-.08-.16-.72-1.74-.99-2.38s-.53-.55-.72-.56h-.62a1.2 1.2 0 0 0-.87.4 3.65 3.65 0 0 0-1.14 2.71A6.36 6.36 0 0 0 10.4 17a14.54 14.54 0 0 0 5.56 4.92c.76.33 1.35.53 1.81.68a4.35 4.35 0 0 0 2 .12 3.28 3.28 0 0 0 2.15-1.52 2.68 2.68 0 0 0 .19-1.52c-.07-.12-.24-.2-.56-.36z" />
           </svg>
         </div>
-
-        <!-- Animated Hug Scene Layer (exact WhatsApp icon size) -->
-        <div class="whatsapp-hug-scene" id="whatsapp-hug-scene">
-          <!-- Runner Left: Younger Brother -->
-          <div class="hug-runner hug-runner-left">
-            <img src="Images/runner-avatar-left.png" alt="Younger Brother Running">
-          </div>
-          <!-- Runner Right: Older Brother -->
-          <div class="hug-runner hug-runner-right">
-            <img src="Images/runner-avatar-right.png" alt="Older Brother Running">
-          </div>
-          <!-- United Hug: Both Brothers Embracing Warmly -->
-          <div class="hug-united" id="hug-united">
-            <img src="Images/kids-hug-circle.png" alt="Brothers Loving Hug">
-          </div>
-        </div>
-      </div>
-
-      <!-- Mini WhatsApp Emblem in bottom-right corner -->
-      <div class="whatsapp-mini-badge" id="whatsapp-mini-badge" title="WhatsApp Chat">
-        <svg viewBox="0 0 32 32" width="13" height="13" fill="none">
-          <path fill="#FFFFFF"
-            d="M16 2A13 13 0 0 0 4.68 20.88L3 27l6.29-1.65A13 13 0 1 0 16 2zm0 23.6a10.55 10.55 0 0 1-5.38-1.47l-.39-.23-4 1.05 1.07-3.9-.25-.4A10.59 10.59 0 1 1 16 25.6zm5.8-7.92c-.32-.16-1.89-.93-2.18-1.04s-.5-.16-.72.16-.84 1.04-1.03 1.26-.38.25-.7.09a8.84 8.84 0 0 1-2.6-1.6 9.77 9.77 0 0 1-1.8-2.24c-.19-.32-.02-.5.14-.66s.32-.38.48-.57a2.16 2.16 0 0 0 .32-.53.59.59 0 0 0-.03-.56c-.08-.16-.72-1.74-.99-2.38s-.53-.55-.72-.56h-.62a1.2 1.2 0 0 0-.87.4 3.65 3.65 0 0 0-1.14 2.71A6.36 6.36 0 0 0 10.4 17a14.54 14.54 0 0 0 5.56 4.92c.76.33 1.35.53 1.81.68a4.35 4.35 0 0 0 2 .12 3.28 3.28 0 0 0 2.15-1.52 2.68 2.68 0 0 0 .19-1.52c-.07-.12-.24-.2-.56-.36z" />
-        </svg>
-      </div>
-
-      <!-- Floating Hearts Burst Layer -->
-      <div class="hug-floating-hearts" id="hug-floating-hearts">
-        <span class="hug-heart h-1">💚</span>
-        <span class="hug-heart h-2">✨</span>
-        <span class="hug-heart h-3">💖</span>
-        <span class="hug-heart h-4">🤗</span>
       </div>
 
       <span class="whatsapp-unread-badge" id="whatsapp-badge">1</span>
-      <div class="whatsapp-trigger-tooltip" id="whatsapp-trigger-tooltip">Touch to hug! 💚 Chat with HantasProperties</div>
+      <div class="whatsapp-trigger-tooltip" id="whatsapp-trigger-tooltip">Chat with Hantas Properties</div>
     </button>
 
     <!-- Chatbot Window Box -->
@@ -1701,7 +1776,7 @@
       <div class="whatsapp-chat-header">
         <div class="whatsapp-avatar-group">
           <div class="whatsapp-avatar">
-            <img src="Images/kids-hug-circle.png" alt="HantasProperties Family Concierge">
+            <img src="Images/logo.jpg" alt="Hantas Properties Concierge" style="object-fit: contain; background: #ffffff;">
             <span class="whatsapp-online-dot"></span>
           </div>
           <div class="whatsapp-bot-info">

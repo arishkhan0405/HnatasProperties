@@ -1,0 +1,7 @@
+# SMTP & Secret Credentials
+smtp.config.json
+.env
+
+# Local Logs & Inquiries Data
+inquiries.json
+inquiries.log
