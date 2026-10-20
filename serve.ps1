@@ -215,6 +215,8 @@ try {
                 
                 $record = [PSCustomObject]@{
                     timestamp = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss")
+                    lead_id = "HP-" + (Get-Date).ToString("yyyyMMdd") + "-" + (Get-Random -Minimum 1000 -Maximum 9999)
+                    submission_id = $inquiryData.submission_id
                     client_name = $inquiryData.client_name
                     client_phone = $inquiryData.client_phone
                     client_email = $inquiryData.client_email
@@ -222,6 +224,7 @@ try {
                     preferred_visit_date = $inquiryData.preferred_visit_date
                     vehicle_pickup_service = $inquiryData.vehicle_pickup_service
                     special_requests = $inquiryData.special_requests
+                    whatsapp_consent = if ($inquiryData.whatsapp_consent) { $inquiryData.whatsapp_consent } else { "NO" }
                     client_city = $inquiryData.client_city
                     recipient_email = "arish@hantasai.com"
                 }

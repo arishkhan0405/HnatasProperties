@@ -1043,7 +1043,41 @@ function initScrollAnimations() {
 /* ==========================================================================
    10. FORM SUBMISSION & DIRECT EMAIL DELIVERY (arish@hantasai.com)
    ========================================================================== */
-const TARGET_INQUIRY_EMAIL = 'arish@hantasai.com';
+const TARGET_INQUIRY_EMAIL = (window.HANTAS_LEAD_CONFIG && window.HANTAS_LEAD_CONFIG.ADMIN_EMAIL) || 'arish@hantasai.com';
+
+/**
+ * Normalizes Indian mobile phone numbers to +91XXXXXXXXXX international format.
+ * Validates 10-digit Indian numbers starting with 6, 7, 8, or 9.
+ */
+function normalizeIndianPhoneNumber(phone) {
+  if (!phone) return null;
+  let digits = String(phone).replace(/\D/g, '');
+
+  if (digits.startsWith('91') && digits.length === 12) {
+    digits = digits.substring(2);
+  } else if (digits.startsWith('0') && digits.length === 11) {
+    digits = digits.substring(1);
+  }
+
+  if (digits.length === 10 && /^[6-9]\d{9}$/.test(digits)) {
+    return '+91' + digits;
+  }
+  return null;
+}
+
+/**
+ * Validates standard email address format.
+ */
+function isValidEmailAddress(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(email).trim());
+}
+
+/**
+ * Generates an idempotent client-side submission ID.
+ */
+function generateSubmissionId() {
+  return 'sub_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+}
 
 function showSubmissionDispatchModal(data, mailtoUrl, whatsappUrl) {
   let modal = document.getElementById('submission-dispatch-modal');
@@ -1097,90 +1131,208 @@ function showSubmissionDispatchModal(data, mailtoUrl, whatsappUrl) {
   }
 }
 
+/**
+ * Transmits inquiry data to Google Apps Script Lead Engine, with fallback
+ * to local server API or pre-filled dispatch links.
+ */
 async function transmitInquiryToEmail(data, formType, submitBtn) {
+  // 1. Client-Side Input Validation
+  const clientName = (data.fullName || data.client_name || '').trim();
+  if (!clientName) {
+    showToast('Please enter your full name.');
+    return { success: false, error: 'Full name required' };
+  }
+
+  const clientEmail = (data.email || data.client_email || '').trim();
+  if (!clientEmail || !isValidEmailAddress(clientEmail)) {
+    showToast('Please enter a valid email address (e.g. name@example.com).');
+    return { success: false, error: 'Valid email required' };
+  }
+
+  const normalizedPhone = normalizeIndianPhoneNumber(data.phone || data.client_phone);
+  if (!normalizedPhone) {
+    showToast('Please enter a valid 10-digit Indian mobile number (e.g. +91 98765 43210).');
+    return { success: false, error: 'Valid 10-digit phone required' };
+  }
+
+  const submissionId = data.submissionId || data.submission_id || generateSubmissionId();
+  const projectSelected = data.projectOfInterest || data.project_of_interest || data.selected_project || 'General Plot Layout';
+  const visitDate = data.preferredVisitDate || data.preferred_visit_date || 'Flexible';
+  const transport = data.vehiclePickupService || data.vehicle_pickup_service || 'Self Vehicle Arrival';
+  const requests = data.specialRequests || data.special_requests || 'None';
+  const waConsent = (data.whatsappConsent === 'yes' || data.whatsapp_consent === 'yes') ? 'yes' : 'no';
+
+  // Construct payload with required camelCase field names + snake_case aliases for universal compatibility
+  const payload = {
+    fullName: clientName,
+    email: clientEmail,
+    phone: normalizedPhone,
+    projectOfInterest: projectSelected,
+    preferredVisitDate: visitDate,
+    vehiclePickupService: transport,
+    specialRequests: requests,
+    whatsappConsent: waConsent,
+    submissionId: submissionId,
+    // snake_case aliases
+    client_name: clientName,
+    client_email: clientEmail,
+    client_phone: normalizedPhone,
+    project_of_interest: projectSelected,
+    preferred_visit_date: visitDate,
+    vehicle_pickup_service: transport,
+    special_requests: requests,
+    whatsapp_consent: waConsent,
+    submission_id: submissionId
+  };
+
   const originalBtnHtml = submitBtn ? submitBtn.innerHTML : '';
   if (submitBtn) {
     submitBtn.disabled = true;
     submitBtn.innerHTML = `
       <span style="display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
-        <span style="display:inline-block; width:14px; height:14px; border:2px solid rgba(255,255,255,0.3); border-top-color:#fff; border-radius:50%; animation: spinSlow 0.8s linear infinite;"></span>
-        <span>Registering Inquiry...</span>
+        <span style="display:inline-block; width:14px; height:14px; border:2px solid rgba(255,255,255,0.3); border-top-color:#ffd700; border-radius:50%; animation: spinSlow 0.8s linear infinite;"></span>
+        <span>Registering Site Visit Request...</span>
       </span>
     `;
   }
 
-  // 1. Post to local server API (/api/inquiry) - saves to inquiries.json and dispatches 2-way emails if SMTP configured
-  let serverDispatched = false;
+  let scriptUrl = (window.HANTAS_LEAD_CONFIG && window.HANTAS_LEAD_CONFIG.GOOGLE_APPS_SCRIPT_URL)
+    ? window.HANTAS_LEAD_CONFIG.GOOGLE_APPS_SCRIPT_URL.trim()
+    : '';
+
+  // Auto-normalize Google Workspace internal URL (/a/macros/domain/) to public endpoint (/macros/)
+  if (scriptUrl && scriptUrl.includes('/a/macros/')) {
+    scriptUrl = scriptUrl.replace(/\/a\/macros\/[^\/]+\//, '/macros/');
+  }
+
   try {
-    const res = await fetch('/api/inquiry', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    });
-    if (res.ok) {
-      const result = await res.json();
-      console.log('Inquiry result from server:', result);
-      if (result.emailSent) {
-        serverDispatched = true;
+    // 2. Primary Path: Submit to Google Apps Script Web App
+    if (scriptUrl && scriptUrl.startsWith('http')) {
+      console.log('Transmitting lead to Google Apps Script Web App:', scriptUrl);
+
+      let res;
+      try {
+        res = await fetch(scriptUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload),
+          redirect: 'follow'
+        });
+      } catch (fetchErr) {
+        console.error('Fetch execution error:', fetchErr);
+        throw new Error(
+          'Deployment Permission Error: Google Apps Script rejected the request because it is restricted to your Google Workspace domain. ' +
+          'In Apps Script, click Deploy > Manage deployments > Edit (pencil) > set "Who has access" to "Anyone" > click Deploy.'
+        );
+      }
+
+      if (res.status === 401 || res.status === 403) {
+        throw new Error(
+          'Google Apps Script 401/403 Unauthorized: The Web App is restricted to domain users. ' +
+          'Please redeploy in Apps Script with "Who has access: Anyone".'
+        );
+      }
+
+      const responseText = await res.text();
+      console.log('Google Apps Script raw response:', responseText.substring(0, 200));
+
+      // Detect if Google redirected to an organization login page
+      if (responseText.includes('Sign in - Google Accounts') || responseText.includes('accounts.google.com')) {
+        throw new Error(
+          'Google Workspace Permission Error: Web App redirected to Google Sign-in. ' +
+          'In Apps Script, click Deploy > Manage deployments > Edit > set "Who has access" to "Anyone" > Deploy.'
+        );
+      }
+
+      let result;
+      try {
+        result = JSON.parse(responseText);
+      } catch (parseErr) {
+        throw new Error(`Unexpected non-JSON response from Apps Script: ${responseText.substring(0, 100)}`);
+      }
+
+      // Confirmation required before showing success
+      if (result && result.success) {
+        if (typeof playChimeSound === 'function') playChimeSound(880, 0.15, 'sine');
+        showToast(`✓ Site visit request registered! Lead ID: ${result.leadId}. Confirmation email sent to ${clientEmail}.`);
+        return { success: true, leadId: result.leadId };
+      } else {
+        showToast(`Inquiry notice: ${result && result.error ? result.error : 'Could not save lead to database'}`);
+        return { success: false, error: result ? result.error : 'Save failed' };
       }
     }
-  } catch (e) {
-    console.warn('Local server inquiry API notice:', e);
+
+    // 3. Fallback Path: Local Server API (/api/inquiry) if running serve.ps1
+    let localSaved = false;
+    let localResult = null;
+    try {
+      const localRes = await fetch('/api/inquiry', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (localRes.ok) {
+        localResult = await localRes.json();
+        localSaved = true;
+      }
+    } catch (localErr) {
+      // Local server not running or static host
+    }
+
+    // 4. Build mailto & WhatsApp dispatch URLs for client convenience
+    const mailSubject = encodeURIComponent(`Plot Inquiry: ${projectSelected} - ${clientName}`);
+    const mailBody = encodeURIComponent(
+      `Hello Hantas Properties Layout Advisory Team,\n\n` +
+      `I would like to schedule a site visit with the following details:\n\n` +
+      `• Client Name: ${clientName}\n` +
+      `• Phone Number: ${normalizedPhone}\n` +
+      `• Email Address: ${clientEmail}\n` +
+      `• Project / Layout: ${projectSelected}\n` +
+      `• Preferred Visit Date: ${visitDate}\n` +
+      `• Vehicle Pick-Up: ${transport}\n` +
+      `• Special Requests: ${requests}\n` +
+      `• WhatsApp Consent: ${waConsent.toUpperCase()}\n\n` +
+      `Sent from HantasProperties Trichy Website.`
+    );
+    const mailtoUrl = `mailto:${TARGET_INQUIRY_EMAIL}?subject=${mailSubject}&body=${mailBody}`;
+
+    const waLines = [
+      `*New Site Visit Inquiry - Hantas Properties*`,
+      ``,
+      `• *Project:* ${projectSelected}`,
+      `• *Name:* ${clientName}`,
+      `• *Phone:* ${normalizedPhone}`,
+      `• *Email:* ${clientEmail}`,
+      `• *Preferred Visit Date:* ${visitDate}`,
+      `• *Vehicle Pick-up:* ${transport}`,
+      requests && requests !== 'None' ? `• *Notes:* ${requests}` : null,
+      ``,
+      `Hello Hantas Properties, please confirm my site visit appointment and share layout blueprint.`
+    ].filter(Boolean).join("\n");
+    const waUrl = `https://wa.me/919600269317?text=${encodeURIComponent(waLines)}`;
+
+    if (localSaved) {
+      if (typeof playChimeSound === 'function') playChimeSound(880, 0.15, 'sine');
+      showToast(`✓ Inquiry recorded locally! Lead ID: ${localResult && localResult.lead_id ? localResult.lead_id : 'HP-Local'}. To connect Google Sheets, configure Google Apps Script in js/lead-config.js.`);
+      return { success: true };
+    }
+
+    // If neither Google Apps Script nor local server is active, show the dispatch window
+    showSubmissionDispatchModal(payload, mailtoUrl, waUrl);
+    showToast(`Notice: Google Apps Script Web App URL is not yet connected in js/lead-config.js. Click below to dispatch your inquiry directly.`);
+    return { success: false, unconfigured: true };
+
+  } catch (err) {
+    console.error('Lead submission failure:', err);
+    showToast(`Notice: ${err.message}`);
+    return { success: false, error: err.message };
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalBtnHtml;
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
   }
-
-  // 2. Build mailto pre-filled draft URL for arish@hantasai.com
-  const projectSelected = data.selected_project || data.project_of_interest || 'General Plot Layout';
-  const mailSubject = encodeURIComponent(`Plot Inquiry: ${projectSelected} - ${data.client_name || 'Client'}`);
-  const mailBody = encodeURIComponent(
-    `Hello Hantas Properties Layout Advisory Team,\n\n` +
-    `I would like to schedule a site visit / receive layout documentation with the following details:\n\n` +
-    `• Client Name: ${data.client_name || 'Not provided'}\n` +
-    `• Phone Number: ${data.client_phone || 'Not provided'}\n` +
-    `• Email Address: ${data.client_email || 'Not provided'}\n` +
-    `• Project / Layout: ${projectSelected}\n` +
-    `• Preferred Visit Date: ${data.preferred_visit_date || 'Flexible'}\n` +
-    `• Vehicle Pick-Up Service: ${data.vehicle_pickup_service || 'Self Arrival'}\n` +
-    `• City / Location: ${data.client_city || 'Trichy'}\n` +
-    `• Special Requests & Loan Guidance: ${data.special_requests || 'None'}\n\n` +
-    `Sent from HantasProperties Trichy Website.`
-  );
-  const mailtoUrl = `mailto:${TARGET_INQUIRY_EMAIL}?subject=${mailSubject}&body=${mailBody}`;
-
-  // 3. Build Instant WhatsApp message
-  const waLines = [
-    `*New Site Visit Inquiry - Hantas Properties*`,
-    ``,
-    `• *Project:* ${projectSelected}`,
-    `• *Name:* ${data.client_name || 'Not provided'}`,
-    `• *Phone:* ${data.client_phone || 'Not provided'}`,
-    data.client_email ? `• *Email:* ${data.client_email}` : null,
-    `• *Preferred Visit Date:* ${data.preferred_visit_date || 'Flexible'}`,
-    `• *Vehicle Pick-up:* ${data.vehicle_pickup_service || 'Self Arrival'}`,
-    data.client_city ? `• *City:* ${data.client_city}` : null,
-    data.special_requests ? `• *Notes:* ${data.special_requests}` : null,
-    ``,
-    `Hello Hantas Properties, please confirm my site visit appointment and share layout blueprint.`
-  ].filter(Boolean).join("\n");
-  const waUrl = `https://wa.me/919600269317?text=${encodeURIComponent(waLines)}`;
-
-  if (typeof playChimeSound === 'function') playChimeSound(880, 0.15, 'sine');
-
-  if (serverDispatched) {
-    showToast(`✓ Inquiry received! Automated emails sent to ${TARGET_INQUIRY_EMAIL} and ${data.client_email || 'your email'}.`);
-    document.querySelectorAll('.modal-backdrop').forEach(m => m.classList.remove('active'));
-  } else {
-    // If SMTP is waiting for credentials, open the dispatch modal
-    showSubmissionDispatchModal(data, mailtoUrl, waUrl);
-    showToast(`Inquiry captured in inquiries.log! Click below to send email to ${TARGET_INQUIRY_EMAIL}`);
-  }
-
-  if (submitBtn) {
-    submitBtn.disabled = false;
-    submitBtn.innerHTML = originalBtnHtml;
-    if (typeof lucide !== 'undefined') lucide.createIcons();
-  }
-
-  return true;
 }
 
 function initFormHandlers() {
@@ -1202,8 +1354,25 @@ function initFormHandlers() {
       const formData = new FormData(contactForm);
       const data = Object.fromEntries(formData.entries());
 
-      await transmitInquiryToEmail(data, 'Main Contact Form Inquiry', submitBtn);
-      contactForm.reset();
+      // Retain unique submissionId across retries
+      if (!contactForm.dataset.submissionId) {
+        contactForm.dataset.submissionId = generateSubmissionId();
+      }
+      data.submissionId = contactForm.dataset.submissionId;
+      data.submission_id = contactForm.dataset.submissionId;
+
+      // Read consent checkbox accurately
+      const consentBox = contactForm.querySelector('#contact-wa-consent');
+      data.whatsappConsent = consentBox && consentBox.checked ? 'yes' : 'no';
+      data.whatsapp_consent = data.whatsappConsent;
+
+      const result = await transmitInquiryToEmail(data, 'Main Contact Form Inquiry', submitBtn);
+      // Only clear form and submissionId once backend confirms success
+      if (result && result.success) {
+        delete contactForm.dataset.submissionId;
+        contactForm.reset();
+        if (consentBox) consentBox.checked = false;
+      }
     });
   }
 
@@ -1215,11 +1384,28 @@ function initFormHandlers() {
       const formData = new FormData(modalBookingForm);
       const data = Object.fromEntries(formData.entries());
 
-      await transmitInquiryToEmail(data, 'VIP Site Visit Modal Booking', submitBtn);
-      setTimeout(() => {
-        document.querySelectorAll('.modal-backdrop').forEach((m) => m.classList.remove('active'));
-      }, 1200);
-      modalBookingForm.reset();
+      // Retain unique submissionId across retries
+      if (!modalBookingForm.dataset.submissionId) {
+        modalBookingForm.dataset.submissionId = generateSubmissionId();
+      }
+      data.submissionId = modalBookingForm.dataset.submissionId;
+      data.submission_id = modalBookingForm.dataset.submissionId;
+
+      // Read consent checkbox accurately
+      const consentBox = modalBookingForm.querySelector('#modal-wa-consent');
+      data.whatsappConsent = consentBox && consentBox.checked ? 'yes' : 'no';
+      data.whatsapp_consent = data.whatsappConsent;
+
+      const result = await transmitInquiryToEmail(data, 'VIP Site Visit Modal Booking', submitBtn);
+      // Only clear form and submissionId once backend confirms success
+      if (result && result.success) {
+        delete modalBookingForm.dataset.submissionId;
+        setTimeout(() => {
+          document.querySelectorAll('.modal-backdrop').forEach((m) => m.classList.remove('active'));
+        }, 1200);
+        modalBookingForm.reset();
+        if (consentBox) consentBox.checked = false;
+      }
     });
   }
 }
