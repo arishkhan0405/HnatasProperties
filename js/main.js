@@ -1092,7 +1092,7 @@ function showSubmissionDispatchModal(data, mailtoUrl, whatsappUrl) {
         </div>
         <span class="badge-tag badge-gold" style="margin-bottom: 0.5rem;">Inquiry Registered Successfully</span>
         <h3 style="color: #fff; font-size: 1.5rem; margin: 0.5rem 0 0.75rem 0;">Direct Dispatch to Advisory</h3>
-        <p style="color: var(--text-secondary); font-size: 0.92rem; line-height: 1.6; margin-bottom: 1.5rem;">
+        <p style="color: #cbd5e1; font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.5rem;">
           Your site visit details have been logged. To ensure immediate attention, choose your preferred channel:
         </p>
 
@@ -1257,7 +1257,7 @@ async function transmitInquiryToEmail(data, formType, submitBtn) {
         showToast(`✓ Site visit request registered! Lead ID: ${result.leadId}. Confirmation email sent to ${clientEmail}.`);
         return { success: true, leadId: result.leadId };
       } else {
-        showToast(`Inquiry notice: ${result && result.error ? result.error : 'Could not save lead to database'}`);
+        showToast(`Submission error: ${result && result.error ? result.error : 'Could not save lead to Google Sheets database.'}`);
         return { success: false, error: result ? result.error : 'Save failed' };
       }
     }

@@ -91,6 +91,10 @@ function doPost(e) {
     }
 
     // B. Handle Website Lead Submission
+    const safeProject = payload.projectOfInterest || payload.project_of_interest || 'N/A';
+    const safeEmail = maskEmail(payload.email || payload.client_email);
+    const safePhone = maskPhone(payload.phone || payload.client_phone);
+    Logger.log(`>>> [doPost] Incoming lead submission: project="${safeProject}", email=${safeEmail}, phone=${safePhone}`);
     return processWebsiteLeadSubmission(payload);
 
   } catch (err) {
@@ -113,7 +117,7 @@ function doPost(e) {
  * ----------------------------------------------------------------------------
  */
 function doGet(e) {
-  // Meta WhatsApp Cloud API Webhook Verification
+  // 1. Meta WhatsApp Cloud API Webhook Verification
   if (e && e.parameter) {
     const mode = e.parameter['hub.mode'];
     const token = e.parameter['hub.verify_token'];
@@ -127,13 +131,16 @@ function doGet(e) {
     }
   }
 
-  // General Health Check
+  // 2. Safe Health Check & Diagnostic Inspection
+  const spreadsheetDiag = checkSpreadsheetConnection();
+
   const status = {
     status: 'ONLINE',
     system: 'Hantas Properties Lead Management Engine',
+    version: '2.1.0',
     timezone: CONFIG.TIMEZONE,
     timestamp: getKolkataTimestamp(),
-    spreadsheetId: SpreadsheetApp.getActiveSpreadsheet().getId()
+    spreadsheet: spreadsheetDiag
   };
   return createJsonResponse(status);
 }
@@ -188,7 +195,17 @@ function processWebsiteLeadSubmission(data) {
   }
 
   // 3. Open or Initialize the Google Sheet
-  const sheet = getOrCreateLeadsSheet();
+  let sheet;
+  try {
+    sheet = getOrCreateLeadsSheet();
+  } catch (sheetErr) {
+    Logger.log('Critical: Google Sheets access failure: ' + sheetErr.message);
+    return createJsonResponse({
+      success: false,
+      error: 'Google Sheets database storage failure: ' + sheetErr.message
+    });
+  }
+
   const leadId = generateLeadId();
   const createdAt = getKolkataTimestamp();
   const nextFollowUpDate = calculateNextFollowUpDate(3); // First follow-up in 3 days
@@ -197,7 +214,7 @@ function processWebsiteLeadSubmission(data) {
   let whatsappStatus = (waConsent === 'YES') ? 'Pending' : 'No Consent';
   let lastError = 'None';
 
-  // 4. Append row to Google Sheets
+  // 4. Append row to Google Sheets and VERIFY saving succeeds BEFORE proceeding
   const newRow = [
     leadId,
     createdAt,
@@ -219,16 +236,40 @@ function processWebsiteLeadSubmission(data) {
     lastError               // Last Error
   ];
 
-  sheet.appendRow(newRow);
-  SpreadsheetApp.flush();
-  const rowIndex = sheet.getLastRow();
+  let rowIndex;
+  try {
+    const prevRowCount = sheet.getLastRow();
+    sheet.appendRow(newRow);
+    SpreadsheetApp.flush();
+    const newRowCount = sheet.getLastRow();
 
-  // Cache submission ID to prevent double insertion
+    if (newRowCount <= prevRowCount) {
+      throw new Error(`Row count did not increment after appendRow (previous: ${prevRowCount}, current: ${newRowCount})`);
+    }
+
+    // Verify written Lead ID matches
+    const verifiedLeadId = sheet.getRange(newRowCount, 1).getValue();
+    if (String(verifiedLeadId).trim() !== String(leadId).trim()) {
+      throw new Error(`Data verification mismatch at row ${newRowCount}: expected Lead ID "${leadId}", found "${verifiedLeadId}"`);
+    }
+
+    rowIndex = newRowCount;
+    Logger.log(`✓ Lead successfully saved and verified in Google Sheets at row ${rowIndex} (Lead ID: ${leadId})`);
+  } catch (saveErr) {
+    Logger.log('Critical error during appendRow verification: ' + saveErr.message);
+    // Return error immediately without sending email or returning false success
+    return createJsonResponse({
+      success: false,
+      error: 'Failed to record lead in Google Sheets database: ' + saveErr.message
+    });
+  }
+
+  // 5. Cache submission ID to prevent double insertion only AFTER verified save
   if (submissionId) {
     cache.put('sub_' + submissionId, leadId, 600); // 10 minutes
   }
 
-  // 5. Send Admin Email Notification to arish@hantasai.com
+  // 6. Send Admin Email Notification to arish@hantasai.com
   const leadData = {
     leadId: leadId,
     createdAt: createdAt,
@@ -245,23 +286,24 @@ function processWebsiteLeadSubmission(data) {
   try {
     sendAdminNotificationEmail(leadData);
     emailStatus = 'Sent (Admin)';
+    Logger.log(`✓ Admin notification email dispatched to ${CONFIG.ADMIN_EMAIL} for Lead ID ${leadId}`);
   } catch (emailErr) {
     emailStatus = 'Failed: ' + emailErr.message;
     lastError = 'Admin Email error: ' + emailErr.message;
-    Logger.log('Admin email failed: ' + emailErr.toString());
+    Logger.log('Admin email notification warning: ' + emailErr.toString());
   }
 
-  // 6. Send Customer Confirmation Auto-reply (Safe failure handling)
+  // 7. Send Customer Confirmation Auto-reply (Safe failure handling)
   try {
     sendCustomerConfirmationEmail(leadData);
     if (emailStatus === 'Sent (Admin)') {
       emailStatus = 'Sent (Admin & Customer)';
     }
   } catch (custErr) {
-    Logger.log('Customer email notice: ' + custErr.toString());
+    Logger.log('Customer confirmation email notice: ' + custErr.toString());
   }
 
-  // 7. Send Immediate WhatsApp Acknowledgement if customer consented
+  // 8. Send Immediate WhatsApp Acknowledgement if customer consented
   if (waConsent === 'YES') {
     try {
       const waResult = sendInitialWhatsAppAcknowledgement(leadData);
@@ -272,17 +314,18 @@ function processWebsiteLeadSubmission(data) {
     } catch (waErr) {
       whatsappStatus = 'Failed: ' + waErr.message;
       lastError = (lastError === 'None') ? waErr.message : lastError + ' | ' + waErr.message;
-      Logger.log('WhatsApp send error: ' + waErr.toString());
+      Logger.log('WhatsApp send notice: ' + waErr.toString());
     }
   }
 
-  // 8. Update Sheet with Email Status, WhatsApp Status, and Last Error
+  // 9. Update Sheet with Email Status, WhatsApp Status, and Last Error
   try {
     sheet.getRange(rowIndex, 12).setValue(emailStatus);    // Col 12: Email Status
     sheet.getRange(rowIndex, 13).setValue(whatsappStatus); // Col 13: WhatsApp Status
     sheet.getRange(rowIndex, 18).setValue(lastError);      // Col 18: Last Error
+    SpreadsheetApp.flush();
   } catch (updateErr) {
-    Logger.log('Status update error: ' + updateErr.toString());
+    Logger.log('Row status update notice: ' + updateErr.toString());
   }
 
   return createJsonResponse({
@@ -782,16 +825,19 @@ function optOutCustomerByPhone(cleanPhone) {
 /**
  * ----------------------------------------------------------------------------
  * 9. GOOGLE SHEETS SETUP & DATA VALIDATION INITIALIZER
- * Run this function once from the Apps Script editor to format the sheet.
  * ----------------------------------------------------------------------------
  */
-function initializeSheet() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
+function initializeSheet(targetSs) {
+  const ss = targetSs || getSpreadsheet();
   let sheet = ss.getSheetByName(CONFIG.SHEET_NAME);
   if (!sheet) {
     sheet = ss.insertSheet(CONFIG.SHEET_NAME, 0);
   }
+  formatLeadsSheetHeaders(sheet);
+  return sheet;
+}
 
+function formatLeadsSheetHeaders(sheet) {
   // Set Headers
   const headerRange = sheet.getRange(1, 1, 1, CONFIG.COLUMNS.length);
   headerRange.setValues([CONFIG.COLUMNS]);
@@ -840,7 +886,7 @@ function initializeSheet() {
     .build();
   sheet.getRange('H2:H5000').setDataValidation(transportRule);
 
-  Logger.log('✓ Google Sheet "Leads" initialized with gold header styling & dropdown validations!');
+  Logger.log('✓ Google Sheet "Leads" formatted with gold luxury headers & validations.');
 }
 
 /**
@@ -878,15 +924,15 @@ function setupDailyTrigger() {
  */
 function testFormSubmission() {
   const testPayload = {
-    client_name: 'Test Client (Arish)',
+    client_name: 'Test Client (Arish Verification)',
     client_email: 'arish@hantasai.com',
     client_phone: '+91 96002 69317',
-    project_of_interest: 'Grand Empire Project',
+    project_of_interest: 'Grand Empire (395 Plots @ Manikandam)',
     preferred_visit_date: '2026-10-25',
     vehicle_pickup_service: 'Trichy Railway Station Pick Up',
-    special_requests: 'East facing plot test with bank loan assistance',
+    special_requests: 'Automated Diagnostic Verification Test',
     whatsapp_consent: 'yes',
-    submission_id: 'test_' + new Date().getTime()
+    submission_id: 'test_verify_' + new Date().getTime()
   };
 
   const fakeEvent = {
@@ -896,7 +942,19 @@ function testFormSubmission() {
   };
 
   const response = doPost(fakeEvent);
-  Logger.log('Test Submission Response: ' + response.getContent());
+  const responseText = response.getContent();
+  Logger.log('Test Submission Response: ' + responseText);
+
+  try {
+    const res = JSON.parse(responseText);
+    if (res.success) {
+      Logger.log('✓ Verification SUCCESS: Lead ID ' + res.leadId + ' confirmed in Google Sheet.');
+    } else {
+      Logger.log('✗ Verification FAILED: ' + res.error);
+    }
+  } catch (e) {
+    Logger.log('✗ Verification parsing error: ' + e.message);
+  }
 }
 
 function testWhatsAppApi() {
@@ -908,17 +966,92 @@ function testWhatsAppApi() {
 
 /**
  * ----------------------------------------------------------------------------
- * 12. HELPER UTILITIES
+ * 12. HELPER UTILITIES & DATABASE ACCESS
  * ----------------------------------------------------------------------------
  */
+
+/**
+ * Resolves the Google Spreadsheet using the Script Property SPREADSHEET_ID.
+ * Adheres strictly to the requirement: Use the configured spreadsheet, do not create a new one.
+ */
+function getSpreadsheet() {
+  const spreadsheetId = (getSecret('SPREADSHEET_ID') || '').trim();
+  if (spreadsheetId) {
+    try {
+      const ss = SpreadsheetApp.openById(spreadsheetId);
+      if (!ss) {
+        throw new Error('SpreadsheetApp.openById returned null');
+      }
+      return ss;
+    } catch (openErr) {
+      Logger.log('Critical: Cannot open Google Sheet with SPREADSHEET_ID [' + maskId(spreadsheetId) + ']: ' + openErr.message);
+      throw new Error('Configured SPREADSHEET_ID (' + maskId(spreadsheetId) + ') could not be opened: ' + openErr.message);
+    }
+  }
+
+  // Fallback to active spreadsheet only if script is container-bound
+  try {
+    const activeSs = SpreadsheetApp.getActiveSpreadsheet();
+    if (activeSs) {
+      return activeSs;
+    }
+  } catch (activeErr) {
+    Logger.log('Active spreadsheet fallback unavailable: ' + activeErr.message);
+  }
+
+  throw new Error('Script property "SPREADSHEET_ID" is not configured. Please open Project Settings > Script Properties and add SPREADSHEET_ID.');
+}
+
+/**
+ * Retrieves or creates the 'Leads' tab inside the configured spreadsheet.
+ */
 function getOrCreateLeadsSheet() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const ss = getSpreadsheet();
   let sheet = ss.getSheetByName(CONFIG.SHEET_NAME);
   if (!sheet) {
-    initializeSheet();
-    sheet = ss.getSheetByName(CONFIG.SHEET_NAME);
+    Logger.log('Tab "' + CONFIG.SHEET_NAME + '" not found in spreadsheet. Initializing tab...');
+    sheet = initializeSheet(ss);
+  } else if (sheet.getLastRow() === 0) {
+    formatLeadsSheetHeaders(sheet);
   }
   return sheet;
+}
+
+/**
+ * Safe health check and diagnostic inspection of the spreadsheet connection.
+ */
+function checkSpreadsheetConnection() {
+  const diag = {
+    configured: false,
+    spreadsheetIdMasked: 'None',
+    spreadsheetTitle: null,
+    leadsTabExists: false,
+    leadRowCount: 0,
+    error: null
+  };
+
+  try {
+    const rawId = getSecret('SPREADSHEET_ID');
+    if (rawId) {
+      diag.configured = true;
+      diag.spreadsheetIdMasked = maskId(rawId);
+    }
+
+    const ss = getSpreadsheet();
+    diag.spreadsheetTitle = ss.getName();
+
+    const sheet = ss.getSheetByName(CONFIG.SHEET_NAME);
+    if (sheet) {
+      diag.leadsTabExists = true;
+      diag.leadRowCount = Math.max(0, sheet.getLastRow() - 1);
+    } else {
+      diag.leadsTabExists = false;
+    }
+  } catch (err) {
+    diag.error = err.message;
+  }
+
+  return diag;
 }
 
 function generateLeadId() {
@@ -973,6 +1106,29 @@ function getSecret(key) {
   } catch (e) {
     return null;
   }
+}
+
+function maskId(id) {
+  if (!id || typeof id !== 'string') return 'N/A';
+  const clean = id.trim();
+  if (clean.length <= 8) return '****';
+  return clean.substring(0, 4) + '...' + clean.substring(clean.length - 4);
+}
+
+function maskEmail(email) {
+  if (!email || typeof email !== 'string' || !email.includes('@')) return '***@***';
+  const parts = email.split('@');
+  const name = parts[0];
+  const domain = parts[1];
+  const maskedName = name.length > 2 ? name[0] + '***' + name[name.length - 1] : name[0] + '***';
+  return maskedName + '@' + domain;
+}
+
+function maskPhone(phone) {
+  if (!phone || typeof phone !== 'string') return '***';
+  const clean = phone.replace(/\s+/g, '');
+  if (clean.length < 5) return '***';
+  return clean.substring(0, 3) + '*****' + clean.substring(clean.length - 2);
 }
 
 function createJsonResponse(obj) {

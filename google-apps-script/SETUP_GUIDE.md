@@ -35,68 +35,72 @@ flowchart TD
 
 ---
 
-## Step 2: Open Google Apps Script & Paste Code
+## Step 2: Open Google Apps Script & Paste Updated Code
 
-1. In your Google Sheet, click **Extensions** in the top menu -> select **Apps Script**.
-2. A new tab will open with a code editor showing a file named `Code.gs`.
-3. Select everything in the editor and delete it.
-4. Open the file [`google-apps-script/Code.gs`](file:///d:/HantasProperties/google-apps-script/Code.gs) in this project, copy the entire code, and paste it into the Apps Script editor.
-5. Click the **Save** icon (diskette icon) or press `Ctrl + S`.
-6. Name your Apps Script project at the top left:  
-   **`Hantas Lead Engine`**
+1. Open your Apps Script project at [script.google.com](https://script.google.com) (or via **Extensions > Apps Script** from your spreadsheet).
+2. Select everything in the editor's `Code.gs` file and delete it.
+3. Open [`google-apps-script/Code.gs`](file:///d:/HantasProperties/google-apps-script/Code.gs) in this workspace, copy the entire code, and paste it into the Apps Script editor.
+4. Click the **Save** icon (`Ctrl + S`).
 
 ---
 
-## Step 3: Run 1-Click Sheet Initialization
+## Step 3: Configure Script Property SPREADSHEET_ID
 
-1. At the top of the Apps Script editor, locate the **Run** dropdown menu (which currently might say `doPost` or `myFunction`).
-2. Click the dropdown and select **`initializeSheet`**.
-3. Click the **Run** button.
-4. Google will ask for **Authorization** ("Authorization required"):
-   - Click **Review permissions**.
-   - Choose your Google account.
-   - Click **Advanced** (small link at bottom left).
-   - Click **Go to Hantas Lead Engine (unsafe)**.
-   - Click **Allow**.
-5. Switch back to your Google Sheet tab. You will see that:
-   - All **18 Columns** are formatted with a gold and navy luxury theme.
-   - The top row is frozen.
-   - Data validation dropdowns are added for **Lead Status**, **Vehicle Pick-up Service**, **WhatsApp Consent**, and **Opt-out Status**.
+1. In the Apps Script left sidebar, click **Project Settings** (gear icon ⚙️).
+2. Scroll down to the **Script Properties** section.
+3. Click **Edit script properties** -> click **Add script property**.
+4. Add your spreadsheet ID:
+   | Property | Value | Description |
+   | :--- | :--- | :--- |
+   | `SPREADSHEET_ID` | `YOUR_SPREADSHEET_ID` | Extracted from `https://docs.google.com/spreadsheets/d/[SPREADSHEET_ID]/edit` |
+5. Click **Save script properties**.
 
 ---
 
-## Step 4: Deploy as a Public Web App
+## Step 4: Run 1-Click Sheet Initialization & Verification
 
-To allow your website form to submit leads to Google Sheets, deploy the script as a Web App:
-
-1. In the Apps Script editor, click the blue **Deploy** button (top right) -> select **New deployment**.
-2. Click the gear icon next to "Select type" -> choose **Web app**.
-3. Fill in the deployment details:
-   - **Description**: `Hantas Leads Production v1`
-   - **Execute as**: `Me (your email)` *(Important: do not change this)*
-   - **Who has access**: `Anyone` *(Crucial so website visitors can submit the form)*
-4. Click **Deploy**.
-5. Copy the **Web App URL**. It looks like this:  
-   `https://script.google.com/macros/s/AKfycbx.../exec`
+1. At the top of the Apps Script editor, locate the **Run** dropdown menu.
+2. Select **`initializeSheet`** and click **Run**.
+3. If Google requests authorization, click **Review permissions** -> select your Google account -> **Advanced** -> **Go to Hantas Lead Engine** -> **Allow**.
+4. Check your Google Sheet:
+   - The **Leads** tab will have the luxury navy & gold header row with all 18 columns.
+   - Column widths and dropdown data validations are configured.
+5. In Apps Script, select **`testFormSubmission`** and click **Run**.
+   - Check the Apps Script execution log: it will verify that the lead row was appended and matched in the spreadsheet, and that the notification email was dispatched to `arish@hantasai.com`.
 
 ---
 
-## Step 5: Connect Web App to Your Website
+## Step 5: Deploy Updated Code as "New Version" (Preserving Web App URL)
 
-1. In your project workspace, open:  
-   [`js/lead-config.js`](file:///d:/HantasProperties/js/lead-config.js)
-2. Paste your Web App URL into the `GOOGLE_APPS_SCRIPT_URL` field:
+> [!IMPORTANT]
+> To update an existing Web App deployment without changing its URL, you must publish a **New version**:
+
+1. In the Apps Script editor, click **Deploy** (top right) -> select **Manage deployments**.
+2. Select your active Web App deployment (`AKfycbwgS4GIc2JIBb8djZGQBoII93dHMTutBJUY5MwGQ_-vwOl9INSADXaZ2ubYPVwMbaykaQ`).
+3. Click the **pencil icon (Edit)** at the top right of the modal.
+4. Under **Version**, click the dropdown and select **New version**.
+5. Ensure:
+   - **Execute as**: `Me (your email)`
+   - **Who has access**: `Anyone`
+6. Click **Deploy**.
+7. The Web App URL remains:
+   `https://script.google.com/macros/s/AKfycbwgS4GIc2JIBb8djZGQBoII93dHMTutBJUY5MwGQ_-vwOl9INSADXaZ2ubYPVwMbaykaQ/exec`
+
+---
+
+## Step 6: Connect Web App URL to Website
+
+1. In your project workspace, open [`js/lead-config.js`](file:///d:/HantasProperties/js/lead-config.js).
+2. Verify that `GOOGLE_APPS_SCRIPT_URL` matches your deployed URL:
    ```javascript
    window.HANTAS_LEAD_CONFIG = {
-     GOOGLE_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/PASTE_YOUR_COPIED_URL_HERE/exec',
+     GOOGLE_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwgS4GIc2JIBb8djZGQBoII93dHMTutBJUY5MwGQ_-vwOl9INSADXaZ2ubYPVwMbaykaQ/exec',
      ADMIN_EMAIL: 'arish@hantasai.com',
      ADVISORY_PHONE: '+91 96002 69317',
      DEFAULT_PROJECT: 'Grand Empire (395 Plots @ Manikandam)'
    };
    ```
-3. Save the file. That's it! Your landing page forms (`#luxury-inquiry-form` and the VIP Modal `#modal-vip-form`) are now live-connected to Google Sheets.
-
----
+3. Website forms (`#luxury-inquiry-form` and `#modal-vip-form`) now securely submit leads directly to your Google Sheet!
 
 ## Step 6: Activate Automated Daily 3-Day Nurturing Trigger
 
