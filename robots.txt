@@ -1,0 +1,24 @@
+User-agent: *
+Allow: /
+Disallow: /inquiries.json
+Disallow: /inquiries.log
+Disallow: /smtp.config.json
+
+# Sitemaps
+Sitemap: https://hantasproperties.com/sitemap.xml
+
+# LLM & AI Answer Engine Directives (Perplexity, GPTBot, ClaudeBot, Google-Extended, Applebot)
+User-agent: GPTBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: CCBot
+Allow: /

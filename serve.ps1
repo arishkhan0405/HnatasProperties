@@ -25,6 +25,8 @@ $mimeTypes = @{
     ".woff" = "font/woff"
     ".woff2"= "font/woff2"
     ".ttf"  = "font/ttf"
+    ".xml"  = "application/xml; charset=utf-8"
+    ".txt"  = "text/plain; charset=utf-8"
 }
 
 function Get-AdminEmailHtml($record) {
@@ -304,9 +306,11 @@ try {
 
             try {
                 $bytes = [System.IO.File]::ReadAllBytes($filePath)
-                $response.ContentLength64 = $bytes.Length
-                $response.OutputStream.Write($bytes, 0, $bytes.Length)
                 $response.StatusCode = 200
+                $response.ContentLength64 = $bytes.Length
+                if ($request.HttpMethod -ne "HEAD") {
+                    $response.OutputStream.Write($bytes, 0, $bytes.Length)
+                }
             } catch {
                 $response.StatusCode = 500
             }

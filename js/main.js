@@ -404,8 +404,28 @@ function initNavigation() {
   const navMenu = document.querySelector('.nav-menu');
   const navLinks = document.querySelectorAll('.nav-link');
 
+  const navBackdrop = document.getElementById('nav-backdrop');
+  const drawerCloseBtn = document.querySelector('.nav-drawer-close-btn');
+
+  function closeMobileNav() {
+    if (navMenu) navMenu.classList.remove('active');
+    if (toggleBtn) toggleBtn.classList.remove('active');
+    if (navBackdrop) navBackdrop.classList.remove('active');
+    document.body.classList.remove('nav-open');
+  }
+
+  function openMobileNav() {
+    if (navMenu) navMenu.classList.add('active');
+    if (toggleBtn) toggleBtn.classList.add('active');
+    if (navBackdrop) navBackdrop.classList.add('active');
+    document.body.classList.add('nav-open');
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
+  }
+
   window.addEventListener('scroll', () => {
-    if (window.scrollY > 40) {
+    if (window.scrollY > 30) {
       header.classList.add('scrolled');
     } else {
       header.classList.remove('scrolled');
@@ -413,16 +433,30 @@ function initNavigation() {
   });
 
   if (toggleBtn && navMenu) {
-    toggleBtn.addEventListener('click', () => {
-      navMenu.classList.toggle('active');
-      toggleBtn.classList.toggle('active');
+    toggleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (navMenu.classList.contains('active')) {
+        closeMobileNav();
+      } else {
+        openMobileNav();
+      }
     });
 
+    if (drawerCloseBtn) {
+      drawerCloseBtn.addEventListener('click', closeMobileNav);
+    }
+
+    if (navBackdrop) {
+      navBackdrop.addEventListener('click', closeMobileNav);
+    }
+
     navLinks.forEach((link) => {
-      link.addEventListener('click', () => {
-        navMenu.classList.remove('active');
-        toggleBtn.classList.remove('active');
-      });
+      link.addEventListener('click', closeMobileNav);
+    });
+
+    // Close when clicking modal trigger inside drawer
+    navMenu.querySelectorAll('.open-booking-modal-btn').forEach((btn) => {
+      btn.addEventListener('click', closeMobileNav);
     });
   }
 
@@ -662,10 +696,18 @@ function init360Showcase() {
       `).join('');
 
       hotspotsContainer.querySelectorAll('.hotspot-pin').forEach(spot => {
-        spot.addEventListener('click', () => {
+        spot.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const wasActive = spot.classList.contains('active-tooltip');
+          hotspotsContainer.querySelectorAll('.hotspot-pin').forEach(p => p.classList.remove('active-tooltip'));
+          if (!wasActive) spot.classList.add('active-tooltip');
           const room = spot.getAttribute('data-room-name') || 'Hotspot';
           showToast(`Inspecting: ${room}`);
         });
+      });
+
+      document.addEventListener('click', () => {
+        hotspotsContainer.querySelectorAll('.hotspot-pin').forEach(p => p.classList.remove('active-tooltip'));
       });
     }
 
@@ -1927,3 +1969,4 @@ function initWhatsAppChatbot() {
     return str.replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
   }
 }
+
