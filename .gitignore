@@ -5,3 +5,8 @@ smtp.config.json
 # Local Logs & Inquiries Data
 inquiries.json
 inquiries.log
+
+# Build Outputs & Dependencies
+dist/
+*.zip
+node_modules/

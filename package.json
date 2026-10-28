@@ -1,0 +1,22 @@
+{
+  "name": "hantasproperties",
+  "version": "1.0.0",
+  "description": "HantasProperties luxury real estate web portal",
+  "main": "index.html",
+  "scripts": {
+    "build": "node build.js",
+    "serve": "powershell -ExecutionPolicy Bypass -File .\\serve.ps1"
+  },
+  "keywords": [
+    "real-estate",
+    "dtcp",
+    "rera",
+    "plots",
+    "trichy"
+  ],
+  "author": "HantasProperties",
+  "license": "ISC",
+  "devDependencies": {
+    "archiver": "^8.0.0"
+  }
+}
