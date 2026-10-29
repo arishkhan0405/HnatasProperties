@@ -930,7 +930,10 @@ function initModals() {
           propSelect.value = 'General Plot Booking Inquiry';
         }
       }
-      if (bookingModal) bookingModal.classList.add('active');
+      if (bookingModal) {
+        initDatePickerRestrictions();
+        bookingModal.classList.add('active');
+      }
     });
   });
 
@@ -1197,6 +1200,20 @@ async function transmitInquiryToEmail(data, formType, submitBtn) {
     return { success: false, error: 'Valid 10-digit phone required' };
   }
 
+  // Validate that preferred visit date is today or in the future
+  const visitDate = data.preferredVisitDate || data.preferred_visit_date || 'Flexible';
+  if (visitDate && visitDate !== 'Flexible') {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    const minTodayStr = `${yyyy}-${mm}-${dd}`;
+    if (visitDate < minTodayStr) {
+      showToast('⚠️ Past dates cannot be booked. Please select today or an upcoming date.');
+      return { success: false, error: 'Past date selected' };
+    }
+  }
+
   const submissionId = data.submissionId || data.submission_id || generateSubmissionId();
   const projectSelected = data.projectOfInterest || data.project_of_interest || data.selected_project || 'General Plot Layout';
   const visitDate = data.preferredVisitDate || data.preferred_visit_date || 'Flexible';
@@ -1377,7 +1394,45 @@ async function transmitInquiryToEmail(data, formType, submitBtn) {
   }
 }
 
+/* ==========================================================================
+   DATE PICKER RESTRICTION ENGINE (DISABLE PAST DATES)
+   ========================================================================== */
+function initDatePickerRestrictions() {
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const dd = String(today.getDate()).padStart(2, '0');
+  const minDateStr = `${yyyy}-${mm}-${dd}`;
+
+  const dateInputs = document.querySelectorAll('input[type="date"]');
+  dateInputs.forEach((input) => {
+    // 1. Set the standard HTML5 min attribute to today's local date
+    input.setAttribute('min', minDateStr);
+    input.min = minDateStr;
+
+    // 2. Prevent manual entry or paste of past dates
+    if (!input.dataset.restrictionBound) {
+      input.dataset.restrictionBound = 'true';
+
+      const validateInputDate = () => {
+        if (input.value && input.value < minDateStr) {
+          input.value = '';
+          if (typeof showToast === 'function') {
+            showToast('⚠️ Past dates cannot be booked. Please select today or an upcoming date.');
+          }
+        }
+      };
+
+      input.addEventListener('change', validateInputDate);
+      input.addEventListener('input', validateInputDate);
+    }
+  });
+}
+
 function initFormHandlers() {
+  // Enforce today & future dates only on all booking calendars
+  initDatePickerRestrictions();
+
   const contactForm = document.getElementById('luxury-inquiry-form');
   const modalBookingForm = document.getElementById('modal-vip-form');
   const backToTopBtn = document.getElementById('footer-back-to-top');
